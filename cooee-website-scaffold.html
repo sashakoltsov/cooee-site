@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooee — Website Scaffold v5 (design tool)</title>
+<style>
+@font-face{font-family:"Favorit";src:url("assets/fonts/favorit-book.woff2") format("woff2"),url("assets/fonts/favorit-book.woff") format("woff");font-weight:400;font-display:swap;}
+@font-face{font-family:"Cooee Grotesk";src:url("assets/fonts/cooee-grotesk.otf") format("opentype");font-weight:400;font-display:swap;}
+:root{
+  --margin:20px; --gutter:10px;
+  --sp-xl:96px; --sp-l:64px; --sp-m:32px; --sp-s:16px;
+  --navlogo:19px; --plogo:22px;
+  --line-w:1px; --line-c:#d3d7dc;
+  --img-hero:82vh; --img-tile:46vh; --img-story:60vh; --img-portrait:58vh; --img-wide:42vh; --img-tall:70vh;
+  --ph:#d9dde2;
+  --shadow-op:45; --btn-radius:10px; --btn-stroke:1px; --btn-fill:#1b1d20; --btn-fill-text:#eef0f2; --btn-sec-text:#1b1d20; --btn-sec-line:#1b1d20; --pillar-h:34vh; --spot-ic:84px; --line-op:100; --img-pack:78vh;
+  --nav-h:54px; --nav-gap:56px;
+  --lc:color-mix(in srgb, var(--line-c) calc(var(--line-op) * 1%), transparent);
+  --page:#eef0f2; --mut:#83888e; --line:#d3d7dc;
+  --anno:#8b9096; --annobg:#e9ebee; --annoline:#b9bfc6;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--page);color:#1b1d20;-webkit-font-smoothing:antialiased}
+body.home{--page:#e6e9ee}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none;cursor:pointer}
+a,button,.btn,.ptile,.m-card,.qbtn,select,.link-u,.menu-t,.nav-in a,footer a,.crumb,.swatches button{transition:color .2s ease-out,background-color .2s ease-out,border-color .2s ease-out,opacity .2s ease-out,transform .2s ease-out}
+.ptile:hover,.m-card:hover{opacity:.9}
+.btn:hover{opacity:.85}
+.link-u:hover{opacity:.7}
+h1,h2,h3{font-weight:400}
+h3{font-size:15px;margin-bottom:4px}
+.kicker{text-transform:uppercase}
+
+.pad{padding-inline:var(--margin)}
+.hold{max-width:1180px;margin-inline:auto;padding-inline:var(--margin)}
+.bleed{width:100%}
+.sp-xl{height:var(--sp-xl)}.sp-l{height:var(--sp-l)}.sp-m{height:var(--sp-m)}.sp-s{height:var(--sp-s)}
+.muted{color:var(--mut)}.center{text-align:center}
+p{max-width:70ch}.lede{max-width:64ch}
+
+.ph{position:relative;display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;background:var(--ph)}
+.ph .lab{font-family:ui-monospace,Menlo,monospace;font-size:11px;max-width:46ch;line-height:1.5;padding:16px;color:var(--lab-c,#9aa0a6);z-index:2}
+.ph .lab .labt{font-size:9.5px;letter-spacing:.06em;color:var(--labt-c,#a6acb2);display:block;margin-bottom:3px}
+.ph .play{position:absolute;right:12px;bottom:10px;font-size:12px;color:#9aa0a6;z-index:2}
+body.hide-imglab .ph .lab{display:none}
+.r-port{height:var(--img-portrait)}.r-wide{height:var(--img-wide)}.r-tall{height:var(--img-tall)}
+
+.anno{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.5;color:var(--anno);background:var(--annobg);border-left:2px dashed var(--annoline);padding:7px 11px;margin:10px 0;border-radius:0 3px 3px 0}
+.anno b{color:#5f656b}
+body.hide-anno .anno{display:none}
+
+.btn{display:inline-block;font-family:"Favorit",sans-serif;font-size:12px;letter-spacing:.02em;padding:12px 24px;border:1px solid var(--btn-fill);background:var(--btn-fill);color:var(--btn-fill-text);cursor:pointer;border-radius:var(--btn-radius)}
+.btn.ghost{background:transparent;color:var(--btn-sec-text);border-color:var(--btn-sec-line)}
+.btn.sm{padding:9px 16px}
+.btn.pebbled{position:relative;isolation:isolate;background:transparent!important;border:0!important;border-radius:0}
+.btn-svg{position:absolute;inset:0;width:100%;height:100%;z-index:-1;overflow:visible}
+.btn.pebbled .btn-svg path{fill:var(--btn-fill);stroke:none;stroke-width:var(--btn-stroke);vector-effect:non-scaling-stroke}
+.btn.ghost.pebbled .btn-svg path{fill:none;stroke:var(--btn-sec-line)}
+.link-u{border-bottom:1px solid #1b1d20;padding-bottom:2px}
+
+.schematic-bar{background:#1f2226;color:#dfe2e5;font-family:ui-monospace,Menlo,monospace;font-size:11px;text-align:center;padding:6px 14px}
+.schematic-bar.off{display:none}
+
+nav{position:sticky;top:0;z-index:60;background:color-mix(in srgb,var(--page) 92%,transparent);backdrop-filter:blur(8px);border-bottom:var(--line-w) solid var(--lc)}
+.nav-in{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;padding:15px var(--margin)}
+.nav-r{display:flex;gap:20px;align-items:center;justify-content:flex-end;margin-right:calc(40px - var(--margin))}
+.nav-left{display:flex;justify-content:flex-start;align-items:center}
+.nav-center{display:flex;justify-content:center;align-items:center}
+.def-l{display:flex;gap:20px;align-items:center}
+.prod-c{display:flex;gap:26px;align-items:center}.prod-c .nav-brand{margin-left:37px}
+.prod-l,.prod-c{display:none}
+body.nav-products .def-l,body.nav-products .def-c{display:none}
+body.nav-products .prod-l{display:flex;align-items:center}
+body.nav-products .prod-c{display:flex}
+.nav-in a:hover,.nav-in a.on{color:#1b1d20}
+.brand-logo{justify-self:center}.brand-logo img{height:var(--navlogo)}
+.menu-t{background:none;border:0;cursor:pointer}
+.menu-t:hover,.menu-t.on,.cur-t:hover{color:#1b1d20}
+.cur-wrap{position:relative}
+.cur-t{background:none;border:0;cursor:pointer;font:inherit}
+.cur-menu{position:absolute;top:calc(100% + 12px);right:0;min-width:124px;background:var(--page);border:var(--line-w) solid var(--lc);border-radius:6px;box-shadow:0 8px 30px rgba(20,22,25,.14);padding:6px;display:none;z-index:70}
+.cur-menu.open{display:block}
+.cur-menu button{display:block;width:100%;text-align:left;background:none;border:0;cursor:pointer;font-family:"Favorit",sans-serif;font-size:13px;color:#1b1d20;padding:8px 10px;border-radius:4px;transition:background-color .2s ease-out}
+.cur-menu button:hover,.cur-menu button.on{background:#e4e7ea}
+
+.mega{position:fixed;left:0;right:0;top:50px;z-index:55;background:var(--page);border-bottom:var(--line-w) solid var(--lc);max-height:calc(100vh - 50px);overflow:auto;transform:translateY(-8px);opacity:0;pointer-events:none;transition:.18s}
+.mega.open{transform:translateY(0);opacity:1;pointer-events:auto}
+.mega-in{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gutter);padding:16px var(--margin) 10px}
+.m-card{cursor:pointer}
+.m-card .ph{height:var(--img-tile);margin-bottom:10px}
+.m-card .mlogo{height:var(--plogo);margin-top:2px}
+.m-card .mlogo.two{height:calc(var(--plogo) * 2.12)}
+.mega-foot{padding:6px var(--margin) 20px}
+.scrim{position:fixed;inset:50px 0 0;background:rgba(20,22,25,.12);z-index:54;opacity:0;pointer-events:none;transition:.18s}
+.scrim.open{opacity:1;pointer-events:auto}
+
+.media{position:relative}
+.media::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(28,30,34,calc(var(--shadow-op)/100*0.6)),transparent 42%);pointer-events:none;z-index:1}
+.concept-over{position:absolute;top:0;left:0;text-align:left;padding:14px 16px;z-index:3;max-width:82%}
+
+.tiles-3{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--gutter)}
+@media(max-width:820px){.tiles-3{grid-template-columns:1fr}}
+.ptile{cursor:pointer;padding-bottom:19px;border-bottom:var(--line-w) solid var(--lc)}
+.ptile .ph{height:var(--img-tile)}
+.ptile .meta{display:grid;grid-template-columns:1fr auto 1fr;align-items:start;column-gap:12px;margin-top:10px;border-top:var(--line-w) solid var(--lc);padding:15px 4px 0}
+.ptile .meta .plogo{grid-column:2}
+.ptile .t-price{grid-column:1;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.ptile .t-occ{grid-column:3;text-align:left}
+.ptile .plogo{height:var(--plogo);margin:0 auto;transition:color .2s ease-out,opacity .2s ease-out}
+.ptile[data-p="cologne"]:hover .plogo{color:#6e4a2e}
+.ptile[data-p="sunskin"]:hover .plogo{color:#e5451f}
+.ptile[data-p="aperitivo"]:hover .plogo{color:#6a2c8f}
+.ptile .plogo.two{height:calc(var(--plogo) * 2.12)}
+
+.hero{position:relative;height:var(--img-hero)}
+.hero .ph{position:absolute;inset:0}
+
+.story .ph{height:var(--img-story)}
+.story .cap{max-width:1180px;margin-inline:auto;padding:14px var(--margin) 0}
+.story .cap .l{max-width:60ch}
+
+.split{display:grid;grid-template-columns:1fr 1fr;gap:var(--gutter);align-items:stretch;border-top:var(--line-w) solid var(--lc);border-bottom:var(--line-w) solid var(--lc)}
+.split > *{min-width:0}
+.split .sig{height:100%;display:flex;flex-direction:column;justify-content:center}
+@media(max-width:820px){.split{grid-template-columns:1fr}}
+.split .txt{padding:44px clamp(12px,4vw,56px)}
+
+.pdp{display:grid;grid-template-columns:1.55fr 1fr;gap:var(--gutter)}
+@media(max-width:940px){.pdp{grid-template-columns:1fr}}
+.gallery{display:grid;gap:var(--gutter)}
+.pdp-info{position:sticky;top:calc(var(--nav-h) + var(--nav-gap));align-self:start;padding:8px clamp(14px,3vw,40px)}
+@media(max-width:940px){.pdp-info{position:static}}
+.pdp-info .plogo{height:calc(var(--plogo) * 1.55)}
+.pdp-info .plogo.two{height:calc(var(--plogo) * 1.55 * 2.12)}
+.pdp-info .concept{margin:10px 0 10px}
+.pdp-rule{border-top:var(--line-w) solid var(--lc);margin:var(--sp-m) 0}
+.buy{border-top:var(--line-w) solid var(--lc);border-bottom:var(--line-w) solid var(--lc);padding:16px 0;margin:16px 0;display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.notes-list{list-style:none;margin:6px 0}
+.notes-list li{padding:9px 0;border-bottom:var(--line-w) solid var(--lc);display:flex;gap:14px}
+.notes-list li:last-child{border-bottom:0}
+.notes-list .nn{min-width:150px;flex-shrink:0}
+.notes-list .role{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--mut);text-transform:uppercase}
+.notes-list .nd{color:#4c5157}
+
+.sig{background:none;border:0;border-left:var(--line-w) solid var(--lc);border-right:var(--line-w) solid var(--lc);padding:14px 16px 10px}
+.sig svg{width:100%;height:auto;display:block}
+.sig .sig-cap{font-family:"Favorit",sans-serif;font-size:12px;color:var(--mut);margin-top:6px}
+.reviews{border-top:var(--line-w) solid var(--lc);padding-top:20px}
+.reviews .q{max-width:52ch}
+
+.pillars{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gutter)}
+@media(max-width:820px){.pillars{grid-template-columns:1fr 1fr}}
+.pillar{background:#e4e7ea;padding:22px 18px;min-height:var(--pillar-h);display:flex;flex-direction:column;justify-content:space-between}
+.pillar .pd{color:#4c5157}
+
+.spots{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--gutter)}
+@media(max-width:820px){.spots{grid-template-columns:1fr 1fr}}
+.spot{text-align:center;padding:18px 10px}
+.spot .ic{width:var(--spot-ic);height:var(--spot-ic);border:var(--line-w) solid var(--lc);border-radius:50%;margin:0 auto 14px;display:flex;align-items:center;justify-content:center;color:var(--mut);font-family:ui-monospace,Menlo,monospace;font-size:9px}
+.crumb{display:inline-block;margin:14px 0}
+.crumb:hover{color:#1b1d20}
+
+footer{background:var(--page);margin-top:var(--sp-xl);border-top:var(--line-w) solid var(--lc)}
+.foot-in{display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1.5fr;gap:28px;padding:40px var(--margin) 30px}
+@media(max-width:820px){.foot-in{grid-template-columns:1fr 1fr}}
+footer h4{font-family:"Favorit",sans-serif;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:12px}
+footer a{display:block;margin-bottom:8px}
+footer a:hover{color:#fff}
+.foot-logo{width:120px;margin-bottom:12px;filter:invert(1) brightness(2)}
+.foot-note{color:var(--mut);max-width:34ch}
+.inp{height:37px;background:#2c3035;border:1px solid #3c4147;margin-bottom:8px}
+.foot-legal{padding:4px var(--margin) 30px;font-family:"Favorit",sans-serif;font-size:13px;color:var(--mut);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.foot-hero{display:none;padding:36px var(--margin) 0}
+.foot-hero img{width:100%;display:block;filter:invert(1) brightness(2)}
+body.footer-logo .foot-hero{display:block}
+.foot-input{width:100%;height:38px;background:transparent;border:var(--line-w) solid var(--lc);color:#1b1d20;padding:0 12px;font-family:"Favorit",sans-serif;font-size:13px;margin-bottom:10px;border-radius:2px}
+.foot-input::placeholder{color:var(--mut)}
+body footer a{color:var(--mut)}
+body footer a:hover{color:#1b1d20}
+.foot-input::placeholder{color:#868b90}
+.ph-up{position:absolute;top:8px;right:8px;z-index:4;width:28px;height:28px;border-radius:50%;border:0;background:rgba(255,255,255,.8);color:#1b1d20;cursor:pointer;font-size:14px;line-height:1;opacity:0;transition:opacity .2s ease-out}
+.ph:hover .ph-up{opacity:1}
+.ph.has-img .lab{display:none}
+@keyframes pagein{from{opacity:0}to{opacity:1}}
+@keyframes imgin{from{opacity:0}to{opacity:1}}
+main.pagein{animation:pagein .8s ease-out}
+.ph{animation:imgin .45s ease-out both}
+/* alt product-nav (centre) */
+.navprod{cursor:pointer}
+.nav-in a.navprod{color:#1b1d20}
+.nav-in a.nav-brand{color:#55595f}
+.navprod[data-p="cologne"]:hover{color:#6e4a2e}
+.navprod[data-p="sunskin"]:hover{color:#e5451f}
+.navprod[data-p="aperitivo"]:hover{color:#6a2c8f}
+.nav-in a.nav-brand:hover{color:#1b1d20}
+.pack-ph img{max-height:90%;max-width:80%;width:auto;height:auto;filter:drop-shadow(0 12px 26px rgba(20,22,25,.16))}
+.pack-3d{padding:0;overflow:hidden;background:#e4e7ea;height:var(--img-pack)}
+.pack-3d iframe{width:100%;height:100%;border:0;display:block}
+.pack-3d .pack-flat{max-height:80%;max-width:78%;width:auto;height:auto;filter:drop-shadow(0 12px 26px rgba(20,22,25,.16))}
+.pack-3d .pack-open{position:absolute;bottom:16px;left:50%;transform:translateX(-50%)}
+body[data-theme] h1,body[data-theme] h2,body[data-theme] .statement,body[data-theme] .pdp-info .concept,body[data-theme] .price{color:var(--t-ink)!important}
+body[data-theme] .kicker{color:var(--t-accent)!important}
+body[data-theme] .link-u{color:var(--t-accent)!important;border-color:var(--t-accent)!important}
+body[data-theme] p,body[data-theme] .lede,body[data-theme] .notes-list .nd,body[data-theme] .notes-list .nn{color:var(--t-body)!important}
+body[data-theme] .caption,body[data-theme] .pmeta,body[data-theme] .sig-cap,body[data-theme] .role,body[data-theme] .sig-tier{color:var(--mut)!important;fill:var(--mut)!important}
+body[data-theme] .sig circle{stroke:var(--t-ink)!important}
+body[data-theme] .sig-key{fill:var(--t-ink)!important}
+body[data-theme] .brand-logo,body[data-theme] .plogo,body[data-theme] .mlogo,body[data-theme] .nav-in a,body[data-theme] .menu-t,body[data-theme] .cur-t{color:var(--t-ink)!important}
+body[data-theme] footer a{color:var(--t-body)!important}
+body[data-theme] .foot-hero,body[data-theme] .bi-logo{color:var(--t-ink)!important}
+body[data-theme] .foot-input{border-color:var(--lc)!important;color:var(--t-ink)!important}
+body[data-theme] .btn{--btn-fill:var(--t-ink);--btn-fill-text:var(--page);--btn-sec-text:var(--t-ink);--btn-sec-line:var(--t-ink)}
+
+.bag-scrim{position:fixed;inset:0;background:rgba(20,22,25,.24);z-index:85;opacity:0;pointer-events:none;transition:.2s}
+.bag-scrim.open{opacity:1;pointer-events:auto}
+#bag{position:fixed;top:0;right:0;bottom:0;width:min(380px,92vw);background:var(--page);z-index:86;transform:translateX(100%);transition:.22s;display:flex;flex-direction:column;box-shadow:-8px 0 30px rgba(0,0,0,.14)}
+#bag.open{transform:translateX(0)}
+.bag-hd{display:flex;justify-content:space-between;align-items:center;padding:18px var(--margin);border-bottom:var(--line-w) solid var(--lc)}
+.bag-x{background:none;border:0;font-size:18px;cursor:pointer;color:var(--mut)}
+.bag-body{flex:1;overflow:auto;padding:6px var(--margin)}
+.bag-item{display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:var(--line-w) solid var(--lc)}
+.bag-item .bi-logo{height:18px}.bag-item .bi-logo.two{height:38px}
+.bag-item .bi-r{margin-left:auto;text-align:right}
+.bag-empty{color:var(--mut);padding:40px 0;text-align:center;font-family:"Favorit",sans-serif}
+.bag-ft{border-top:var(--line-w) solid var(--lc);padding:16px var(--margin);font-family:"Favorit",sans-serif}
+.bag-ft .row{display:flex;justify-content:space-between;margin-bottom:12px}
+.qbtn{border:var(--line-w) solid var(--lc);background:none;width:22px;height:22px;cursor:pointer}
+
+body.design [data-dm]{outline:1px dashed rgba(43,120,228,.5);outline-offset:1px}
+#dmBadge{position:fixed;z-index:95;background:#2b78e4;color:#fff;font-family:ui-monospace,Menlo,monospace;font-size:11px;padding:3px 7px;border-radius:3px;pointer-events:none;display:none}
+
+#gear{position:fixed;right:16px;bottom:16px;z-index:90;width:42px;height:42px;border-radius:50%;background:#1b1d20;color:var(--page);border:0;cursor:pointer;font-size:17px;box-shadow:0 3px 14px rgba(0,0,0,.22)}
+#settings{position:fixed;right:16px;bottom:68px;z-index:90;width:308px;max-height:84vh;overflow:auto;background:var(--page);border:var(--line-w) solid var(--lc);border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.16);padding:16px;display:none;font-family:"Favorit",sans-serif}
+#settings.open{display:block}
+#settings .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+#settings .top h5{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.grp{border-top:var(--line-w) solid var(--lc);padding:12px 0 4px}
+.grp.flash{background:#e2ecfb}
+.grp .gt{font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.ctl{margin-bottom:11px}
+.ctl label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px}
+.ctl label .v{color:var(--mut);font-family:ui-monospace,Menlo,monospace;font-size:11px}
+.ctl input[type=range]{width:100%;accent-color:#1b1d20}
+.ctl select{width:100%;font:inherit;font-size:12px;padding:5px;border:var(--line-w) solid var(--lc);background:#fff}
+.ctl.rw{display:flex;justify-content:space-between;align-items:center}.ctl.rw label{margin:0}
+.swatches{display:flex;gap:6px}
+.swatches button{width:26px;height:22px;border:var(--line-w) solid var(--lc);cursor:pointer}
+.swatches button.on{outline:2px solid #1b1d20;outline-offset:1px}
+.dm-row{display:flex;justify-content:space-between;align-items:center;background:#e2ecfb;border:1px solid #b9d2f6;border-radius:5px;padding:8px 10px;margin-bottom:10px;font-size:12px}
+.io-row{display:flex;gap:8px}
+#settings .reset{font-size:11px;color:var(--mut);background:none;border:0;cursor:pointer;text-decoration:underline}
+#styleSel,#imgSel{width:100%;font:inherit;font-size:12px;padding:5px;border:var(--line-w) solid var(--lc);background:#fff;margin-bottom:10px;font-weight:600}
+
+/* inline-logo sizing + recolour (currentColor) */
+.brand-logo{display:inline-flex;align-items:center;color:#1b1d20}
+.nav-in a.brand-logo{color:#1b1d20}
+.brand-logo svg{height:var(--navlogo);width:auto;display:block;fill:currentColor}
+.plogo,.mlogo,.bi-logo{display:inline-block;line-height:0;color:#1b1d20}
+.plogo svg,.mlogo svg,.bi-logo svg{width:auto;fill:currentColor;display:block}
+.ptile .plogo svg,.m-card .mlogo svg{height:var(--plogo)}
+.ptile .plogo.two svg,.m-card .mlogo.two svg{height:calc(var(--plogo)*2.12)}
+.pdp-info .plogo svg{height:calc(var(--plogo)*1.55)}
+.pdp-info .plogo.two svg{height:calc(var(--plogo)*1.55*2.12)}
+.bag-item .bi-logo svg{height:18px}
+.bag-item .bi-logo.two svg{height:38px}
+.foot-hero{color:#1b1d20;padding:36px var(--margin) 0}
+.foot-hero svg{width:100%;height:auto;fill:currentColor;display:block}
+#gear2{position:fixed;right:66px;bottom:16px;z-index:90;width:42px;height:42px;border-radius:50%;background:#3a3d42;color:var(--page);border:0;cursor:pointer;font-size:15px;box-shadow:0 3px 14px rgba(0,0,0,.22)}
+#sections{position:fixed;right:66px;bottom:68px;z-index:90;width:270px;max-height:74vh;overflow:auto;background:var(--page);border:var(--line-w) solid var(--lc);border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.16);padding:14px;display:none;font-family:"Favorit",sans-serif}
+#sections.open{display:block}
+#sections .top h5{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.secrow{display:flex;align-items:center;gap:7px;padding:8px 0;border-bottom:var(--line-w) solid var(--lc);font-size:12.5px}
+.secrow .lbl{flex:1}
+.secrow button{border:var(--line-w) solid var(--lc);background:none;width:24px;height:24px;cursor:pointer;border-radius:3px}
+.secrow button:disabled{opacity:.3;cursor:default}
+/* design panels stay theme-independent & readable on coloured pages */
+#settings,#sections{background:#eef0f2;color:#1b1d20;border:1px solid #d3d7dc;--mut:#83888e;--lc:#d3d7dc}
+#settings .ctl select,#settings input{color:#1b1d20}
+/* breathing room under the sticky nav; centred hero/intro text */
+main{padding-top:var(--nav-gap)}
+.intro-copy{max-width:var(--intro-w,720px);margin-inline:auto;text-align:var(--intro-align,center);padding-left:var(--intro-pl,0px)}
+.hero .ph .lab{text-align:center}
+/* menu hover on themed product pages (theme forces colour with !important, so dim on hover) */
+body[data-theme] .nav-in a:hover,body[data-theme] .menu-t:hover,body[data-theme] .cur-t:hover{opacity:.6}
+body[data-theme] .ph .lab,body[data-theme] .ph .labt{color:var(--t-body)}
+body[data-theme] .ptile .lab{color:var(--lab-c,#9aa0a6)}
+body[data-theme] .ptile .labt{color:var(--labt-c,#a6acb2)}
+body[data-view="fragrance"] main{padding-top:var(--gutter)}
+.pdp-info{margin-top:calc(var(--nav-gap) - var(--gutter))}
+@media(max-width:940px){.pdp-info{margin-top:0}}
+body[data-view="brand"] main{padding-top:0}
+body[data-view="brand"] .split{border:0}
+#gear,#gear2{display:none}
+body.edit-mode #gear,body.edit-mode #gear2{display:block}
+.doc{max-width:1180px;margin-inline:auto;padding:var(--sp-l) var(--margin);display:grid;grid-template-columns:210px 1fr;gap:52px;align-items:start}
+.doc-nav{position:sticky;top:96px;align-self:start;font-family:"Favorit",sans-serif;font-size:13px;line-height:1.5}
+.doc-nav .dn-t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);margin-bottom:10px}
+.doc-nav a{display:block;padding:6px 0 6px 14px;color:var(--mut);cursor:pointer;border-left:2px solid var(--lc);transition:color .2s ease-out,border-color .2s ease-out}
+.doc-nav a:hover{color:#1b1d20}
+.doc-nav a.on{color:#1b1d20;border-left-color:#1b1d20}
+.doc-body{min-width:0}
+.doc-body .doc-lede{margin:6px 0 var(--sp-m)}
+.doc-body section{margin-bottom:var(--sp-l);scroll-margin-top:96px}
+.doc-body h2{margin-bottom:14px}
+.doc-body p{margin-bottom:12px}
+.doc-body ul{margin:0 0 14px 0;padding-left:18px}
+.doc-body li{margin-bottom:7px;max-width:70ch}
+.doc-body .sub{font-family:"Favorit",sans-serif;font-weight:400;margin:18px 0 6px}
+.doc-table{width:100%;border-collapse:collapse;margin:6px 0 18px;font-family:"Favorit",sans-serif;font-size:14px;line-height:1.45}
+.doc-table th,.doc-table td{text-align:left;vertical-align:top;padding:11px 16px 11px 0;border-bottom:var(--line-w) solid var(--lc)}
+.doc-table th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--mut);font-weight:400;white-space:nowrap}
+.doc-table td .nm{color:#1b1d20}
+.doc-ba{border-left:2px solid var(--lc);padding:2px 0 2px 16px;margin:0 0 14px}
+.doc-ba .bad{color:var(--mut)}
+@media(max-width:820px){.doc{grid-template-columns:1fr;gap:24px}.doc-nav{display:none}}
+#doclinks{position:fixed;right:0;bottom:0;z-index:80;display:flex}
+#doclinks .doclink{background:#1b1d20;color:#eef0f2;font-family:"Favorit",sans-serif;font-size:13px;padding:13px 20px;cursor:pointer;border-left:1px solid rgba(255,255,255,.16)}
+#doclinks .doclink:hover{background:#000}
+.fn{color:var(--mut);cursor:pointer;font-size:.68em;vertical-align:super;padding-left:1px;font-family:"Favorit",sans-serif}
+.fn:hover{color:#1b1d20}
+.doc-notes .fn-back{color:var(--mut);cursor:pointer;margin-left:8px;text-decoration:none;font-size:14px}
+.doc-notes .fn-back:hover{color:#1b1d20}
+.doc-notes{list-style:none;margin:0;padding:0;counter-reset:fn}
+.doc-notes li{position:relative;padding-left:26px;margin-bottom:12px;color:var(--mut);font-size:13.5px;line-height:1.5;max-width:70ch;scroll-margin-top:96px}
+.doc-notes li::before{counter-increment:fn;content:counter(fn);position:absolute;left:0;top:0;font-size:11px;color:#1b1d20;border:var(--line-w) solid var(--lc);width:18px;height:18px;line-height:16px;text-align:center;border-radius:50%}
+</style>
+</head>
+<body class="hide-anno">
+<style id="typeCSS"></style>
+
+<div class="schematic-bar off" id="schemBar">Schematic / design tool — turn on Design mode to name and edit every type and image style.</div>
+
+<nav>
+  <div class="nav-in">
+    <div class="nav-left">
+      <div class="def-l"><button class="menu-t" id="fragBtn" data-dm>Fragrances</button><a onclick="go('#/brand')" data-m="brand" data-dm>Brand</a></div>
+      <div class="prod-l"><a class="brand-logo" onclick="go('#/home')"><svg viewBox="0 0 1097.24 251.6" xmlns="http://www.w3.org/2000/svg"><path d="M780.54,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78ZM433.59,125.8c0,69.48-47.68,125.8-125.37,125.8s-125.37-56.32-125.37-125.8S229.74,0,308.22,0s125.37,56.32,125.37,125.8ZM308.22,70.4c-34.56,0-55.21,24.8-55.21,55.4s19.51,55.4,55.21,55.4,55.21-24.8,55.21-55.4-21-55.4-55.21-55.4ZM569.3,0c-78.48,0-125.37,56.32-125.37,125.8s44.31,125.8,125.37,125.8,125.37-56.32,125.37-125.8S646.99,0,569.3,0ZM624.51,125.8c0,30.6-21,55.4-55.21,55.4s-55.21-24.8-55.21-55.4,20.65-55.4,55.21-55.4,55.21,24.8,55.21,55.4ZM132.42,69.09c20.41,0,29.6,1.24,49.65,5V8.31c-15.23-3.95-32.81-5.93-56.29-5.93v.02C51.81,2.41,0,57.65,0,125.8s51.34,123.39,125.78,123.39v.02c21.33,0,37.19-2.03,56.29-5.98v-65.72c-19.72,3.94-28.97,5-49.65,5-37.99,0-63.31-25.39-63.31-56.71,0-31.32,22.5-56.71,63.31-56.71ZM984.53,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78Z"/></svg></a></div>
+    </div>
+    <div class="nav-center">
+      <div class="def-c"><a class="brand-logo" onclick="go('#/home')"><svg viewBox="0 0 1097.24 251.6" xmlns="http://www.w3.org/2000/svg"><path d="M780.54,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78ZM433.59,125.8c0,69.48-47.68,125.8-125.37,125.8s-125.37-56.32-125.37-125.8S229.74,0,308.22,0s125.37,56.32,125.37,125.8ZM308.22,70.4c-34.56,0-55.21,24.8-55.21,55.4s19.51,55.4,55.21,55.4,55.21-24.8,55.21-55.4-21-55.4-55.21-55.4ZM569.3,0c-78.48,0-125.37,56.32-125.37,125.8s44.31,125.8,125.37,125.8,125.37-56.32,125.37-125.8S646.99,0,569.3,0ZM624.51,125.8c0,30.6-21,55.4-55.21,55.4s-55.21-24.8-55.21-55.4,20.65-55.4,55.21-55.4,55.21,24.8,55.21,55.4ZM132.42,69.09c20.41,0,29.6,1.24,49.65,5V8.31c-15.23-3.95-32.81-5.93-56.29-5.93v.02C51.81,2.41,0,57.65,0,125.8s51.34,123.39,125.78,123.39v.02c21.33,0,37.19-2.03,56.29-5.98v-65.72c-19.72,3.94-28.97,5-49.65,5-37.99,0-63.31-25.39-63.31-56.71,0-31.32,22.5-56.71,63.31-56.71ZM984.53,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78Z"/></svg></a></div>
+      <div class="prod-c"><a class="navprod" data-p="cologne" onclick="go('#/fragrance/cologne')">Cooee Cologne</a><a class="navprod" data-p="sunskin" onclick="go('#/fragrance/sunskin')">Sun Skin</a><a class="navprod" data-p="aperitivo" onclick="go('#/fragrance/aperitivo')">Aperitivo</a><a class="navprod nav-brand" onclick="go('#/brand')">Brand</a></div>
+    </div>
+    <div class="nav-r"><a onclick="go('#/stockists')" data-dm>Stockists</a><div class="cur-wrap"><button class="cur-t" id="curBtn" data-dm>GBP £</button><div class="cur-menu" id="curMenu"><button data-c="£" class="on">GBP £</button><button data-c="$">USD $</button><button data-c="€">EUR €</button></div></div><a id="bagLink" onclick="openBag()" data-dm>Bag ( )</a></div>
+  </div>
+</nav>
+<div class="scrim" id="scrim" onclick="closeMega()"></div>
+<div class="mega" id="mega"><div class="mega-in" id="megaCards"></div><div class="mega-foot"><a class="link-u" onclick="go('#/fragrances')">View all three</a></div></div>
+
+<main id="app"></main>
+
+<footer>
+  <div class="foot-hero" id="footHero"><svg viewBox="0 0 1097.24 251.6" xmlns="http://www.w3.org/2000/svg"><path d="M780.54,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78ZM433.59,125.8c0,69.48-47.68,125.8-125.37,125.8s-125.37-56.32-125.37-125.8S229.74,0,308.22,0s125.37,56.32,125.37,125.8ZM308.22,70.4c-34.56,0-55.21,24.8-55.21,55.4s19.51,55.4,55.21,55.4,55.21-24.8,55.21-55.4-21-55.4-55.21-55.4ZM569.3,0c-78.48,0-125.37,56.32-125.37,125.8s44.31,125.8,125.37,125.8,125.37-56.32,125.37-125.8S646.99,0,569.3,0ZM624.51,125.8c0,30.6-21,55.4-55.21,55.4s-55.21-24.8-55.21-55.4,20.65-55.4,55.21-55.4,55.21,24.8,55.21,55.4ZM132.42,69.09c20.41,0,29.6,1.24,49.65,5V8.31c-15.23-3.95-32.81-5.93-56.29-5.93v.02C51.81,2.41,0,57.65,0,125.8s51.34,123.39,125.78,123.39v.02c21.33,0,37.19-2.03,56.29-5.98v-65.72c-19.72,3.94-28.97,5-49.65,5-37.99,0-63.31-25.39-63.31-56.71,0-31.32,22.5-56.71,63.31-56.71ZM984.53,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78Z"/></svg></div>
+  <div class="foot-in">
+    <div><p class="foot-note" data-dm>Australian fragrance, blended by hand in small batches.</p></div>
+    <div><h4>Shop</h4><a data-dm onclick="go('#/fragrances')">Fragrances</a><a onclick="go('#/discovery')">Discovery set</a><a onclick="return false" style="opacity:.5">Candles</a></div>
+    <div><h4>Brand</h4><a onclick="go('#/brand')">Our brand</a><a onclick="go('#/stockists')">Stockists and trade</a><a onclick="return false">Fragrantica</a><a onclick="return false">Basenotes</a></div>
+    <div><h4>Legal</h4><a onclick="return false">Terms</a><a onclick="return false">Privacy</a><a onclick="return false">Shipping &amp; returns</a></div>
+    <div class="foot-sign"><h4>Keep in touch</h4><p class="foot-note" style="margin-bottom:10px" data-dm>An occasional note from us, nothing more.</p><input type="email" class="foot-input" placeholder="Email address"><a class="btn ghost" onclick="return false">Sign up</a></div>
+  </div>
+  <div class="foot-legal"><span>Cooee 2026. Made in Australia</span></div>
+</footer>
+
+<div class="bag-scrim" id="bagScrim" onclick="closeBag()"></div>
+<aside id="bag"><div class="bag-hd"><h3>Your bag</h3><button class="bag-x" onclick="closeBag()">✕</button></div><div class="bag-body" id="bagBody"></div><div class="bag-ft" id="bagFt"></div></aside>
+
+<div id="doclinks"><a class="doclink" onclick="go('#/tone-of-voice')">Tone of voice</a><a class="doclink" onclick="go('#/brand-snapshot')">Brand snapshot</a></div>
+<div id="dmBadge"></div>
+<input type="file" id="imgUpload" accept="image/*" style="display:none">
+<button id="gear2" title="Page sections">▤</button>
+<div id="sections"><div class="top"><h5>Sections — this page</h5></div><div id="seclist"></div></div>
+<button id="gear" title="Design settings">⚙</button>
+<div id="settings">
+  <div class="top"><h5>Design settings</h5><button class="reset" id="resetBtn">reset all</button></div>
+  <div class="dm-row"><label for="dmTog">Design mode — click any element to edit its style</label><input type="checkbox" id="dmTog"></div>
+  <div id="typeGroup" class="grp"><div class="gt">Type styles</div><select id="styleSel"></select><div id="styleCtls"></div></div>
+  <div id="imgGroup" class="grp"><div class="gt">Image styles</div><select id="imgSel"></select><div id="imgCtls"></div></div>
+  <div id="groups"></div>
+  <div class="grp"><div class="gt">Save / load</div><div class="io-row"><button class="btn sm" id="saveJson">Save JSON</button><button class="btn sm ghost" id="loadBtn">Load JSON</button><input type="file" id="loadJson" accept="application/json" style="display:none"></div></div>
+</div>
+
+<script>
+"use strict";
+const FAV='"Favorit",sans-serif', GROT='"Cooee Grotesk",sans-serif';
+
+const FRAGRANCES=[
+  {id:"cologne",name:"Cooee Cologne",logo:"assets/logos/cologne.svg",two:true,type:"Eau de Toilette",concept:"Saturdays at the surf club",occasion:"Everyday",
+   hero:"Coast, clear morning, real light. Green scrub, water beyond, unstyled (ref: Max Dupain / Ken Done). No perfume-counter gloss.",
+   story:"A green morning by the coast, before anyone else is up.",
+   intro:"A green morning by the coast. Blue cypress from Darwin opens it up and bergamot lifts it, then Australian sandalwood settles in, warm and dry.",
+   notes:[["Blue Cypress","top",3,"From Darwin. Green and resinous, the way the air smells first thing."],["Bergamot","top",2,"The lift."],["Australian Sandalwood","base",3,"Warm and dry underneath."],["Mineral air","base",2,"The part you can't quite name."]],
+   made:"You know the smell of the air near the coast on a clear morning: green and a little resinous, with something mineral underneath. That mineral part is geosmin, the molecule behind the smell of rain on dry ground. It is what makes this smell like a place instead of a product.",
+   perf:"It settles to mineral air and a soft skin musk, and stays close rather than loud."},
+  {id:"sunskin",name:"Sun Skin",logo:"assets/logos/sun-skin.svg",type:"Eau de Parfum",concept:"Nourished by sun",occasion:"Afternoon",
+   hero:"Late afternoon, warm low sun on bare skin, unhurried. Warmth as sensation (ref: Dupain 'Sunbaker'). Not a beach-lifestyle shot, not SPF.",
+   story:"Late afternoon on the south coast, when the light does most of the work.",
+   intro:"The warmth of late afternoon, the kind that sinks into your skin and slows everything down. Turmeric leaf and magnolia keep it green and bright while a soft, sunlit warmth stays close for hours.",
+   notes:[["Turmeric Leaf","top",3,"The leaf, not the kitchen spice. Green, citrus, tropical."],["Magnolia","top",2,"Bright and floral."],["Solar salicylate","heart",2,"The sunlit, radiant part."],["Cashmeran","base",3,"Warm, a little smoky."]],
+   made:"This is the feeling more than the smell: the moment late sun sinks in and you do not want to move. The warm and the fresh sit against each other the whole way through, so it never settles into just one thing.",
+   perf:"The warm character holds for hours. That is the part people come back for."},
+  {id:"aperitivo",name:"Aperitivo",logo:"assets/logos/aperitivo.svg",type:"Eau de Parfum",concept:"The night before it begins",occasion:"Night",
+   hero:"Dark, atmospheric, cinematic. The pause before going out, low light. Deliberately NOT golden-hour aperitif imagery — the name's framing is carried here.",
+   story:"The hour before you go out, when you have decided the night is going to be a good one.",
+   intro:"That hour before the night really starts. It is the pause before you head out, when you have decided the night is going to be a good one. Blackcurrant and blue cypress open dark and green. Violet softens the middle before a warm musk takes over and stays close, long after the first drink.",
+   notes:[["Blue Cypress","top",3,"Dark and resinous."],["Blackcurrant","top",2,"Ripe, a little bitter."],["Violet / Iris","heart",2,"The soft middle."],["Cypriol","base",2,"Leathered and woody."],["Macrocyclic Musk","base",3,"Warm. The part that lingers."]],
+   made:"There is no rose or saffron in it, and none of the usual big-night clichés. It is about the anticipation more than the drink: the moment before, not the bar.",
+   perf:"It is built to last the evening. The warm musk base carries it, long after the first drink."}
+];
+const F=id=>FRAGRANCES.find(f=>f.id===id);
+const COOEE_SVG=`<svg viewBox="0 0 1097.24 251.6" xmlns="http://www.w3.org/2000/svg"><path d="M780.54,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78ZM433.59,125.8c0,69.48-47.68,125.8-125.37,125.8s-125.37-56.32-125.37-125.8S229.74,0,308.22,0s125.37,56.32,125.37,125.8ZM308.22,70.4c-34.56,0-55.21,24.8-55.21,55.4s19.51,55.4,55.21,55.4,55.21-24.8,55.21-55.4-21-55.4-55.21-55.4ZM569.3,0c-78.48,0-125.37,56.32-125.37,125.8s44.31,125.8,125.37,125.8,125.37-56.32,125.37-125.8S646.99,0,569.3,0ZM624.51,125.8c0,30.6-21,55.4-55.21,55.4s-55.21-24.8-55.21-55.4,20.65-55.4,55.21-55.4,55.21,24.8,55.21,55.4ZM132.42,69.09c20.41,0,29.6,1.24,49.65,5V8.31c-15.23-3.95-32.81-5.93-56.29-5.93v.02C51.81,2.41,0,57.65,0,125.8s51.34,123.39,125.78,123.39v.02c21.33,0,37.19-2.03,56.29-5.98v-65.72c-19.72,3.94-28.97,5-49.65,5-37.99,0-63.31-25.39-63.31-56.71,0-31.32,22.5-56.71,63.31-56.71ZM984.53,157.4h95.82v-61.29h-95.82c-8.16,0-14.78-6.62-14.78-14.78h0c0-8.16,6.62-14.78,14.78-14.78h112.71V5.7h-187.31v240.21h187.31v-58.4h-112.71c-8.16,0-14.78-6.62-14.78-14.78v-.54c0-8.16,6.62-14.78,14.78-14.78Z"/></svg>`;
+const PLOGO_SVG={cologne:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 203.03 60.1">  <g>    <g>      <path d="M89.04,17.95h10.93v-6.99h-10.93c-.93,0-1.69-.75-1.69-1.69h0c0-.93.75-1.69,1.69-1.69h12.86V.65h-21.37v27.4h21.37v-6.66h-12.86c-.93,0-1.69-.75-1.69-1.69v-.06c0-.93.75-1.69,1.69-1.69ZM49.46,14.35c0,7.93-5.44,14.35-14.3,14.35s-14.3-6.42-14.3-14.35S26.21,0,35.16,0s14.3,6.42,14.3,14.35ZM35.16,8.03c-3.94,0-6.3,2.83-6.3,6.32s2.23,6.32,6.3,6.32,6.3-2.83,6.3-6.32-2.4-6.32-6.3-6.32ZM64.94,0c-8.95,0-14.3,6.42-14.3,14.35s5.05,14.35,14.3,14.35,14.3-6.42,14.3-14.35S73.8,0,64.94,0ZM71.24,14.35c0,3.49-2.4,6.32-6.3,6.32s-6.3-2.83-6.3-6.32,2.36-6.32,6.3-6.32,6.3,2.83,6.3,6.32ZM15.11,7.88c2.33,0,3.38.14,5.66.57V.95c-1.74-.45-3.74-.68-6.42-.68h0C5.91.27,0,6.58,0,14.35s5.86,14.08,14.35,14.08h0c2.43,0,4.24-.23,6.42-.68v-7.5c-2.25.45-3.3.57-5.66.57-4.33,0-7.22-2.9-7.22-6.47s2.57-6.47,7.22-6.47ZM112.31,17.95h10.93v-6.99h-10.93c-.93,0-1.69-.75-1.69-1.69h0c0-.93.75-1.69,1.69-1.69h12.86V.65h-21.37v27.4h21.37v-6.66h-12.86c-.93,0-1.69-.75-1.69-1.69v-.06c0-.93.75-1.69,1.69-1.69Z"/>      <g>        <path d="M72.34,32.04v27.41h21.81v-7.38h-11.78c-.93,0-1.69-.76-1.69-1.69v-18.34s-8.35,0-8.35,0Z"/>        <path d="M70.49,45.75c0,7.93-5.44,14.35-14.31,14.35s-14.31-6.43-14.31-14.35,5.35-14.35,14.31-14.35,14.31,6.43,14.31,14.35ZM56.19,39.43c-3.94,0-6.3,2.83-6.3,6.32s2.23,6.32,6.3,6.32,6.3-2.83,6.3-6.32-2.4-6.32-6.3-6.32Z"/>        <path d="M107.79,31.39c-8.95,0-14.31,6.43-14.31,14.35s5.06,14.35,14.31,14.35,14.31-6.43,14.31-14.35-5.44-14.35-14.31-14.35ZM114.09,45.75c0,3.49-2.4,6.32-6.3,6.32s-6.3-2.83-6.3-6.32,2.36-6.32,6.3-6.32,6.3,2.83,6.3,6.32Z"/>        <path d="M36.13,39.28c2.33,0,3.38.14,5.67.57v-7.51c-1.74-.45-3.74-.68-6.42-.68h0c-8.44,0-14.35,6.31-14.35,14.08s5.86,14.08,14.35,14.08h0c2.43,0,4.24-.23,6.42-.68v-7.5c-2.25.45-3.31.57-5.67.57-4.33,0-7.22-2.9-7.22-6.47,0-3.57,2.57-6.47,7.22-6.47Z"/>        <path d="M190.17,49.35h10.93v-6.99h-10.93c-.93,0-1.69-.76-1.69-1.69h0c0-.93.76-1.69,1.69-1.69h12.86v-6.94h-21.37v27.41h21.37v-6.66h-12.86c-.93,0-1.69-.76-1.69-1.69v-.06c0-.93.76-1.69,1.69-1.69Z"/>        <path d="M170.41,45.79l-13.58-13.61h-5.52v27.28h8.16v-13.61l13.58,13.61h5.52v-27.28h-8.16v13.61Z"/>        <path d="M148.59,57.88v-15.54h-12.51v6.53h5.09c.9,0,1.63.73,1.63,1.63h0c0,.82-.61,1.52-1.43,1.62-.79.1-1.76.18-2.96.18-5.39,0-7.22-2.9-7.22-6.47s2.4-6.47,8.19-6.47c2.76,0,5.51.32,8.08.98v-7.51c-2.57-.68-5.61-1.08-8.83-1.08h0c-9.62,0-15.32,6.31-15.32,14.08s5.54,14.08,14.13,14.08h1.04c3.23,0,7.08-.76,10.11-2.03Z"/>      </g>    </g>  </g></svg>`,sunskin:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 188.6 28.29">  <g>    <g>      <path d="M54.51.78h-8.04v13.8c0,4.67-3.07,5.65-5.65,5.65-2.11,0-5.65-.73-5.65-5.65V.78h-8.04v13.8c0,8.07,5.63,13.7,13.7,13.7s13.7-5.51,13.7-13.7V.78h-.02Z"/>      <path d="M158.35.78h-8.04v26.89h8.04V.78Z"/>      <path d="M76.51,14.77L61.98.78h-5.45v26.89h8.04v-13.99l14.54,13.99h5.45V.78h-8.04v13.99Z"/>      <path d="M180.56.78v13.99l-14.54-13.99h-5.44v26.89h8.04v-13.99l14.54,13.99h5.44V.78h-8.04Z"/>      <path d="M140.32.78l-7.84,8.16c-.65.68-1.79.22-1.79-.72V.78h-8.04v26.89h8.04v-7.57c0-.94,1.15-1.4,1.79-.71l7.83,8.29h9.47l-12.81-13.56,12.81-13.34h-9.47Z"/>      <path d="M109.91,17.61c2.01.19,3.06.6,3.06,1.68,0,1.27-1.64,1.94-5.63,1.94-4.52,0-8.7-1.57-12.17-3.34v7.3c3.47,1.88,7.25,3.1,12.35,3.1,9.78,0,12.87-4.22,12.87-9.01,0-4.35-3.19-7.55-9.7-8.11-1.58-.14-3.92-.32-5.74-.48-2.01-.19-3.06-.6-3.06-1.68,0-1.27,1.64-1.94,5.63-1.94s7.95,1.01,11.55,2.28V2.14c-3.41-1.26-7.55-2.14-11.73-2.14-9.1,0-12.87,4.3-12.87,9.01,0,4.35,3.19,7.55,9.7,8.11,2.28.2,3.87.33,5.74.48Z"/>      <path d="M15.44,17.61c2.01.19,3.06.6,3.06,1.68,0,1.27-1.64,1.94-5.63,1.94-4.52,0-8.7-1.57-12.17-3.34v7.3c3.47,1.88,7.25,3.1,12.35,3.1,9.78,0,12.87-4.22,12.87-9.01,0-4.35-3.19-7.55-9.7-8.11-1.58-.14-3.92-.32-5.74-.48-2.01-.19-3.06-.6-3.06-1.68,0-1.27,1.64-1.94,5.63-1.94s7.95,1.01,11.55,2.28V2.14c-3.41-1.26-7.55-2.14-11.73-2.14C3.77,0,0,4.3,0,9.01c0,4.35,3.19,7.55,9.7,8.11,2.28.2,3.87.33,5.74.48Z"/>    </g>  </g></svg>`,aperitivo:`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 207.57 28.28">  <g>    <g>      <rect x="107.27" y=".64" width="8.07" height="26.98"/>      <path d="M46.18.63h-14.91s0,26.98,0,26.98h8.07v-8.27s6.84,0,6.84,0c5.17,0,9.36-4.19,9.36-9.36h0c0-5.17-4.19-9.36-9.36-9.36ZM44.95,12.5h-5.61s0-5.03,0-5.03h5.61c1.39,0,2.52,1.13,2.52,2.52s-1.13,2.52-2.52,2.52Z"/>      <path d="M19.58.64h-7.95s-.04,0-.04,0l.02.04L0,27.64h7.95s1.96-4.55,1.96-4.55h11.35s1.96,4.55,1.96,4.55h8.05S19.64.64,19.64.64h-.06ZM12.86,16.26l2.73-6.34,2.73,6.34h-5.46Z"/>      <path d="M56.68,27.64h21.06s0-6.57,0-6.57h-12.67c-.92,0-1.66-.74-1.66-1.66v-.06c0-.92.74-1.66,1.66-1.66h10.77v-6.89h-10.77c-.92,0-1.66-.74-1.66-1.66s.74-1.66,1.66-1.66h12.67V.64s-21.06,0-21.06,0v27Z"/>      <polygon points="174.12 .64 167.74 15.46 161.36 .64 152.61 .64 164.24 27.64 170.86 27.64 182.49 .64 174.12 .64"/>      <path d="M105.1,9.78h0c0-5.05-4.1-9.15-9.15-9.15h-15.42s0,26.98,0,26.98h8.07v-10.5s7.73,10.52,7.73,10.52h8.99s-6.69-9.11-6.69-9.11c3.74-1.15,6.46-4.63,6.46-8.75ZM97.03,9.78c0,1.27-1.03,2.31-2.31,2.31h-6.12s0-4.62,0-4.62h6.12c1.27,0,2.31,1.03,2.31,2.31h0Z"/>      <path d="M193.48,0c-8.82,0-14.09,6.33-14.09,14.14s4.98,14.14,14.09,14.14,14.09-6.33,14.09-14.14S202.21,0,193.48,0ZM193.48,20.37c-4.01,0-6.21-2.79-6.21-6.23s2.32-6.23,6.21-6.23,6.21,2.79,6.21,6.23-2.36,6.23-6.21,6.23Z"/>      <rect x="143.41" y=".64" width="8.07" height="26.98"/>      <polygon points="116.67 8.46 125.39 8.46 125.39 27.62 133.46 27.62 133.46 8.46 142.18 8.46 142.18 .64 116.67 .64 116.67 8.46"/>    </g>  </g></svg>`};
+const THEMES={
+  cologne:{bg:"#231c1c",footer:"#1a1414",footerInk:"#a1bad8",ink:"#a1bad8",body:"rgba(161,186,216,.86)",mut:"rgba(161,186,216,.55)",accent:"#a1bad8",line:"rgba(161,186,216,.55)",ph:"#3a3230",tile:"#2c2424"},
+  sunskin:{bg:"#d8b0c8",footer:"#c99bb8",footerInk:"#702c14",ink:"#702c14",body:"#702c14",mut:"rgba(112,44,20,.7)",accent:"#702c14",line:"rgba(112,44,20,.5)",ph:"#C27386",tile:"#e6c6d7"},
+  aperitivo:{bg:"#b0c5d6",footer:"#9db4c8",footerInk:"#1a1320",ink:"#1a1320",body:"#1a1320",mut:"rgba(26,19,32,.6)",accent:"#4a1571",line:"rgba(26,19,32,.45)",ph:"#666194",tile:"#c2d2df"}
+};
+function computeLC(){var op=(curVar("--line-op")||"100"),id=document.body.dataset.theme,base=(id&&THEMES[id])?THEMES[id].line:(curVar("--line-c")||"#d3d7dc");document.documentElement.style.setProperty("--lc","color-mix(in srgb, "+base+" calc("+op+" * 1%), transparent)");}
+function applyTheme(id){
+  const b=document.body,t=id&&THEMES[id],K=["--page","--mut","--line-c","--ph","--t-ink","--t-body","--t-accent","--t-tile","--t-footer","--t-footer-ink"];
+  if(!t){b.removeAttribute("data-theme");K.forEach(k=>b.style.removeProperty(k));computeLC();return;}
+  b.dataset.theme=id;
+  b.style.setProperty("--page",t.bg);b.style.setProperty("--mut",t.mut);b.style.setProperty("--line-c",t.line);b.style.setProperty("--ph",t.ph);
+  b.style.setProperty("--t-ink",t.ink);b.style.setProperty("--t-body",t.body);b.style.setProperty("--t-accent",t.accent);b.style.setProperty("--t-tile",t.tile);b.style.setProperty("--t-footer",t.footer);b.style.setProperty("--t-footer-ink",t.footerInk);computeLC();
+}
+const PRICE_VAL=250;let CUR="£";const price=()=>CUR+PRICE_VAL;
+
+/* ---- TYPE STYLES ---- */
+const STYLES=[
+  {id:"display",name:"Overlay / concept (Grotesk)",sel:".concept-over, .pdp-info .concept, .pillar .pw"},
+  {id:"statement",name:"Statement (Grotesk)",sel:".statement"},
+  {id:"bigword",name:"Big word (Grotesk)",sel:".bigword"},
+  {id:"heading",name:"Heading (H1 / H2)",sel:"h1, h2"},
+  {id:"lede",name:"Lede / intro",sel:".lede"},
+  {id:"body",name:"Body",sel:"body, p, .notes-list .nd, .story .cap .l, .reviews .q"},
+  {id:"caption",name:"Caption / meta",sel:".caption, .pmeta, .foot-note, .spot .st, .spot .sd, .pdp-info .type, .sig-cap"},
+  {id:"kicker",name:"Kicker / label",sel:".kicker"},
+  {id:"menu",name:"Menu / nav",sel:".nav-in a, .menu-t, .cur-t"},
+  {id:"utilnav",name:"Utility nav (Stockists/Bag)",sel:".nav-r a, .nav-r .cur-t"},
+  {id:"breadcrumb",name:"Breadcrumb",sel:".crumb"},
+  {id:"price",name:"Price",sel:".price, .bi-r, .bag-ft .row"},
+  {id:"footer",name:"Footer nav",sel:"footer a"},
+  {id:"notename",name:"Note name",sel:".notes-list .nn"},
+  {id:"noterole",name:"Note role / tier",sel:".notes-list .role, .sig-tier"},
+  {id:"sigkey",name:"Signature keyword",sel:".sig-key"},
+  {id:"intro",name:"Intro copy",sel:".intro-copy"}
+];
+const DEF_TYPE={
+  display:{font:GROT,weight:400,size:20,lh:1.05,ls:0,color:"#1b1d20"},
+  statement:{font:GROT,weight:400,size:30,lh:1.0,ls:-0.01,color:"#1b1d20"},
+  bigword:{font:GROT,weight:400,size:65,lh:0.92,ls:-0.02,color:"#1b1d20"},
+  heading:{font:FAV,weight:400,size:32,lh:1.14,ls:-0.005,color:"#1b1d20"},
+  lede:{font:FAV,weight:400,size:16,lh:1.4,ls:0,color:"#1b1d20"},
+  body:{font:FAV,weight:400,size:16,lh:1.4,ls:0,color:"#1b1d20"},
+  caption:{font:FAV,weight:400,size:15.5,lh:1.4,ls:0,color:"#83888e"},
+  kicker:{font:FAV,weight:400,size:12,lh:1.3,ls:0.02,color:"#83888e"},
+  menu:{font:GROT,weight:400,size:16,lh:1.4,ls:0,color:"#83888e"},
+  utilnav:{font:FAV,weight:400,size:13,lh:1.4,ls:0,color:"#83888e"},
+  breadcrumb:{font:FAV,weight:400,size:12,lh:1.4,ls:0,color:"#83888e"},
+  price:{font:FAV,weight:400,size:26,lh:1.3,ls:0,color:"#1b1d20"},
+  footer:{font:FAV,weight:400,size:13,lh:1.7,ls:0,color:"#c2c6ca"},
+  notename:{font:FAV,weight:400,size:15,lh:1.4,ls:0,color:"#1b1d20"},
+  noterole:{font:FAV,weight:400,size:12,lh:1.54,ls:0,color:"#83888e"},
+  sigkey:{font:FAV,weight:400,size:14.5,lh:1.04,ls:0,color:"#1b1d20"},
+  intro:{font:FAV,weight:400,size:22,lh:1.45,ls:0,color:"#1b1d20"}
+};
+let TYPE=JSON.parse(JSON.stringify(DEF_TYPE));
+const RENDER_ORDER=["body","footer","menu","utilnav","breadcrumb","price","caption","kicker","notename","noterole","sigkey","intro","heading","lede","display","statement","bigword"];
+const MATCH_ORDER=["price","breadcrumb","sigkey","noterole","notename","intro","display","statement","bigword","kicker","utilnav","menu","footer","lede","heading","caption","body"];
+function renderType(){
+  let css="";
+  RENDER_ORDER.forEach(id=>{const s=STYLES.find(x=>x.id===id),v=TYPE[id];
+    css+=`${s.sel}{font-family:${v.font};font-weight:${v.weight};font-size:${v.size}px;line-height:${v.lh};letter-spacing:${v.ls}em;color:${v.color};fill:${v.color}}\n`;});
+  css+=".concept-over{color:#fff}\n";
+  document.getElementById("typeCSS").textContent=css;
+}
+function matchStyle(el){for(const id of MATCH_ORDER){const s=STYLES.find(x=>x.id===id);if(el.closest&&el.closest(s.sel))return s;}return null;}
+
+/* ---- IMAGE STYLES ---- */
+const IMG_STYLES=[
+  {id:"hero",name:"Hero",v:"--img-hero",sel:".hero"},
+  {id:"tile",name:"Product tile",v:"--img-tile",sel:".ptile .ph, .m-card .ph"},
+  {id:"story",name:"Story (full width)",v:"--img-story",sel:".story .ph"},
+  {id:"portrait",name:"Side / portrait",v:"--img-portrait",sel:".r-port"},
+  {id:"wide",name:"Detail / wide",v:"--img-wide",sel:".r-wide"},
+  {id:"tall",name:"Gallery tall",v:"--img-tall",sel:".r-tall"},
+  {id:"pack",name:"Packaging widget",v:"--img-pack",sel:".pack-3d"}
+];
+const IMG_MATCH=["pack","portrait","wide","tall","story","tile"];
+
+/* ---- HELPERS ---- */
+const app=document.getElementById("app");
+function slugify(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"").slice(0,52);}
+function ph(label,rClass="",tag="IMAGE",video=false){
+  const slot=slugify(tag+"-"+label);
+  return `<div class="ph ${rClass}" data-slot="${slot}"><span class="lab"><span class="labt">${tag}${video?" / VIDEO":""}</span>${label}</span>${video?'<span class="play">▶</span>':''}<button class="ph-up" title="Upload image · slot: ${slot}">⤴</button></div>`;
+}
+const anno=t=>`<div class="anno"><b>NOTE:</b> ${t}</div>`;
+const plogo=(f,cls="plogo")=>`<span class="${cls}${f.two?' two':''}" aria-label="${f.name}">${PLOGO_SVG[f.id]}</span>`;
+function seeded(str){let h=1779033703^str.length;for(let i=0;i<str.length;i++){h=Math.imul(h^str.charCodeAt(i),3432918353);h=h<<13|h>>>19;}return()=>{h=Math.imul(h^h>>>16,2246822507);h=Math.imul(h^h>>>13,3266489909);h^=h>>>16;return(h>>>0)/4294967296;};}
+/* scent signature — one outlined circle per tier, keyword centred */
+function signature(f){
+  const W=680,H=196,cy=100,r=76,cx={top:214,heart:340,base:466};
+  const tiers=[["top","Top"],["heart","Heart"],["base","Base"]];let out="";
+  tiers.forEach(([role,tname])=>{
+    const inTier=f.notes.filter(n=>n[1]===role).sort((a,b)=>b[2]-a[2]);
+    const kw=inTier.length?inTier[0][0]:tname, x=cx[role], w=kw.split(" ");
+    const sk=TYPE.sigkey||{size:13,lh:1.05}, gap=sk.size*sk.lh;
+    out+=`<circle cx="${x}" cy="${cy}" r="${r}" fill="none" stroke="#1b1d20" stroke-opacity="0.5" stroke-width="1"/>`;
+    out+=`<text class="sig-tier" x="${x}" y="${cy-r-9}" text-anchor="middle">${tname.toUpperCase()}</text>`;
+    if(w.length>1){out+=`<text class="sig-key" x="${x}" y="${(cy-gap/2).toFixed(1)}" text-anchor="middle" dominant-baseline="central">${w[0]}</text><text class="sig-key" x="${x}" y="${(cy+gap/2).toFixed(1)}" text-anchor="middle" dominant-baseline="central">${w.slice(1).join(" ")}</text>`;}
+    else out+=`<text class="sig-key" x="${x}" y="${cy}" text-anchor="middle" dominant-baseline="central">${kw}</text>`;
+  });
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${f.name} structure">${out}</svg>`;
+}
+const sigBlock=(f,cap)=>`<div class="sig">${signature(f)}${cap?`<div class="sig-cap">${cap}</div>`:""}</div>`;
+const storyMoment=(label,line)=>`<div class="story bleed">${ph(label,"","STORY",true)}${line?`<div class="cap"><div class="l">${line}</div></div>`:""}</div>`;
+const mediaConcept=(f,rClass,tag)=>`<div class="media">${ph(f.hero,rClass,tag,true)}</div>`;
+function split(imgLeft,kicker,head,body,media,extra=""){
+  const m=`<div>${media}</div>`, t=`<div class="txt">${kicker?`<div class="kicker">${kicker}</div><div class="sp-s"></div>`:""}${head}<div class="sp-s"></div>${body}${extra}</div>`;
+  return `<section class="split bleed">${imgLeft?m+t:t+m}</section>`;
+}
+
+/* ---- VIEWS ---- */
+function viewHome(){
+  return `
+  <section class="sec" data-sec="Hero"><section class="hero bleed">${ph("HERO — one Australian outdoor moment, real light, calm and wide. Story video welcome (ref: Loewe injected video).","","HERO",true)}</section><div class="sp-l"></div></section>
+  <section class="sec" data-sec="About"><div class="hold"><p class="intro-copy">Cooee is an independent Australian fragrance house. We make three fragrances, each built around a particular Australian moment. Everything is blended by hand, in small batches. We're open about what goes into them, down to the last material. And once a fragrance is right, we don't change it.</p></div><div class="sp-l"></div></section>
+  <section class="sec" data-sec="Three fragrances"><div class="hold"><div class="kicker">The range</div><div class="sp-s"></div><h2>Three fragrances</h2></div><div class="sp-s"></div><div class="pad"><div class="tiles-3" id="homeTiles"></div></div><div class="sp-xl"></div></section>
+  <section class="sec" data-sec="Story">${storyMoment("STORY MOMENT — a slow outdoor scene, ambient.","")}<div class="sp-xl"></div></section>
+  <section class="sec" data-sec="Materials">${split(true,"What it's made of","<h2>We show you how each one is built</h2>","<p>Most perfume brands keep their materials to themselves. We list ours, and we show how each fragrance is built: what opens it, what sits in the middle, and what it settles into.</p><div class='sp-m'></div><a class='link-u' onclick=\"go('#/fragrances')\">See what's in each one</a>",`<div class="sig" style="background:none;padding:clamp(16px,3vw,32px)">${signature(F("cologne"))}<div class="sig-cap" style="margin-top:8px">Cooee Cologne — how it opens, softens and settles</div></div>`)}<div class="sp-xl"></div></section>
+  <section class="sec" data-sec="Brand">${split(false,"Our brand","<h2>An independent Australian house</h2>","<p>Cooee is an independent fragrance house with an Australian point of view. Three fragrances, blended by hand in small batches, built to smell like specific places and moments.</p><div class='sp-m'></div><a class='btn ghost' onclick=\"go('#/brand')\">Read what we're about</a>",ph("Landscape or still life, real and unstyled.","r-port","IMAGE"))}<div class="sp-xl"></div></section>`;
+}
+function viewFragrances(){
+  return `<div class="hold"><div class="sp-l"></div><h1>Fragrances</h1><p class="lede">Three for now, each one a particular Australian moment.</p></div>
+  <div class="sp-m"></div><div class="pad"><div class="tiles-3" id="fragTiles"></div></div><div class="sp-xl"></div>`;
+}
+function viewPDP(id){
+  const f=F(id);if(!f)return viewFragrances();
+  const others=FRAGRANCES.filter(x=>x.id!==id);
+  const notes=f.notes.map(n=>`<li><span class="nn">${n[0]}<div class="role">${n[1]}</div></span><span class="nd">${n[3]}</span></li>`).join("");
+  const cross=others.map(o=>{const T=THEMES[o.id]||{};const st=T.tile?` style="--ph:${T.tile};--lab-c:${T.body};--labt-c:${T.mut}"`:"";return `<a class="ptile" data-p="${o.id}"${st} onclick="go('#/fragrance/${o.id}')">${mediaConcept(o,"r-port","IMG")}<div class="meta"><span class="t-price"><span class="price">${price()}</span><span class="caption">100 ml</span></span>${plogo(o)}<span class="t-occ caption">${o.occasion}</span></div></a>`;}).join("");
+  return `
+  <section class="pdp bleed"><div class="gallery">${ph(f.hero,"r-tall","HERO",true)}${location.protocol==="file:"?`<div class="ph pack-3d r-port"><img class="pack-flat" src="assets/packs/${f.id}-front.svg" alt="${f.name} pack"><a class="btn ghost sm pack-open" href="assets/packaging/index.html?p=${f.id==='sunskin'?'sun-skin':f.id}" target="_blank" rel="noopener">Open 3D viewer ↗</a></div>`:`<div class="ph pack-3d r-port"><iframe src="assets/packaging/index.html?embed=1&p=${f.id==='sunskin'?'sun-skin':f.id}" title="${f.name} packaging" loading="lazy" scrolling="no"></iframe></div>`}${ph(f.name+" — detail / texture","r-wide","IMG")}${ph(f.name+" — story frame","r-port","STORY",true)}</div>
+    <div class="pdp-info">${plogo(f)}<div class="concept">${f.concept}</div><div class="type caption" style="margin-bottom:12px">${f.type}</div>
+      <p>${f.intro}</p>
+      <div class="buy"><span class="price">${price()}</span><span class="caption">100 ml</span><a class="btn" onclick="addToBag('${f.id}')">Add to bag</a></div>
+      ${sigBlock(f)}<div class="pdp-rule"></div><div class="kicker">The moment</div><div class="sp-s"></div><p>${f.made}</p>
+      <div class="pdp-rule"></div><div class="kicker">How it wears</div><div class="sp-s"></div><p>${f.perf}</p>
+      <p class="caption" style="margin-top:10px;font-size:12px">Blended by hand in small batches. The formula doesn't change.</p></div></section>
+  <div class="sp-xl"></div>${storyMoment("STORY MOMENT — "+f.name+", ambient.",f.story)}
+  <div class="sp-xl"></div><div class="hold"><div class="kicker">What it's made of</div><div class="sp-s"></div><h2>The materials, and how they sit</h2><div class="sp-m"></div>
+    <div class="split" style="border:0;padding:0;gap:clamp(24px,4vw,56px)"><div><ul class="notes-list">${notes}</ul></div>
+      <div>${sigBlock(f,"How it opens, softens and settles")}</div></div></div>
+  <div class="sp-xl"></div><div class="hold"><h2>What people say</h2><div class="sp-s"></div>
+    <div class="reviews"><p class="q lede">Customer reviews will appear here, drawn from Fragrantica and Basenotes.</p><p class="caption" style="margin-top:8px">Fragrantica and Basenotes</p></div></div>
+  <div class="sp-xl"></div><div class="hold"><h2>The other two</h2></div><div class="sp-s"></div>
+  <div class="pad"><div class="tiles-3" style="grid-template-columns:repeat(2,1fr)">${cross}</div></div><div class="sp-xl"></div>`;
+}
+function viewBrand(){
+  return `
+  <section class="sec" data-sec="Refined informality"><div class="hold center"><div class="bigword">REFINED<br>INFORMALITY</div><div class="sp-m"></div><p class="lede" style="margin:0 auto">Australia is refined and informal at the same time, modern cities and wild country side by side. Cooee is built on that tension.</p></div></section>
+  <section class="sec" data-sec="Our brand">${split(true,"Our brand","<div class=\"statement\">We make fragrance that smells like Australia.</div>","",ph("Australian landscape, wild and real (2022 refs: pervasive, untamed, bold).","r-port","IMAGE",true))}</section>
+  <section class="sec" data-sec="Story">${storyMoment("STORY MOMENT — coast or bush, unhurried.","")}</section>
+  <section class="sec" data-sec="How it's made">${split(false,"How it's made","<h2>Independent, and made by hand</h2>","<p>Cooee is an independent fragrance house, made by one person in small batches. The range is deliberately small and the making is exacting, with an Australian point of view throughout.</p>",ph("Making / materials on the bench, honest and plain.","r-port","IMAGE"))}</section>
+  <section class="sec" data-sec="The moments">${split(true,"The moments","<h2>Three moments worth stopping for</h2>","<p>A Saturday morning at the coast, late sun on your skin, and the hour before a night out. Each fragrance is made to take you out of your head and back into the room.</p>",ph("Three moments — a triptych of places and times of day.","r-port","IMAGE"))}</section>
+  <section class="sec" data-sec="What we're like"><div class="hold"><div class="kicker">What we're like</div><div class="sp-s"></div><h2>Four things that stay constant</h2></div><div class="sp-m"></div>
+  <div class="pad"><div class="pillars">
+    <div class="pillar"><div class="pw">Uninhibited</div><div class="pd">Living in the present, expressive and unrestrained.</div></div>
+    <div class="pillar"><div class="pw">Down to earth</div><div class="pd">No pretension. Genuine, laid-back, straight-forward.</div></div>
+    <div class="pillar"><div class="pw">Open</div><div class="pd">Welcoming and curious. Happy to explain ourselves.</div></div>
+    <div class="pillar"><div class="pw">Credible</div><div class="pd">Honest and assured. High standards, quietly held.</div></div></div></div></section>
+  <section class="sec" data-sec="Open materials">${split(false,"Open about our materials","<h2>We tell you what's inside</h2>","<p>Most of the industry keeps its materials and formulas quiet. We would rather show you what is in each fragrance and how it is built. And once a fragrance is right, we don't reformulate it. It stays as it is.</p>",`<div class="sig" style="background:none;padding:clamp(16px,3vw,32px)">${signature(F("aperitivo"))}<div class="sig-cap" style="margin-top:8px">Aperitivo — how it opens, softens and settles</div></div>`)}</section>
+  <section class="sec" data-sec="Made responsibly"><div class="hold"><div class="kicker">Made responsibly</div><div class="sp-s"></div><h2>The way it's made</h2><div class="sp-s"></div></div><div class="sp-m"></div>
+  <div class="pad"><div class="spots">
+    <div class="spot"><div class="ic">ICON</div><div class="st">Made by hand</div><div class="sd">Small batches</div></div>
+    <div class="spot"><div class="ic">ICON</div><div class="st">Vegan</div><div class="sd">plant and synthetic</div></div>
+    <div class="spot"><div class="ic">ICON</div><div class="st">Cruelty-free</div><div class="sd">never tested on animals</div></div>
+    <div class="spot"><div class="ic">ICON</div><div class="st">Safety-assessed</div><div class="sd">for retail</div></div></div></div></section>`;
+}
+function viewDiscovery(){return `<div class="hold"><div class="sp-m"></div><h1>Discovery set</h1><p class="lede">The three-in-small-sizes set is coming soon. Try all three, and the price comes off your first full bottle.</p><div class="sp-xl"></div></div>`;}
+function viewStockists(){return `<div class="hold"><div class="sp-m"></div><h1>Stockists and trade</h1><p class="lede">Cooee is available to specialist retailers.</p><div class="sp-l"></div>
+  <div class="split" style="border:0;padding:0;gap:clamp(24px,4vw,56px)"><div><p>We work with a small number of considered retailers. If you would like to stock Cooee, get in touch and we will send the line sheet, wholesale pricing, tester and POS options, and samples.</p><div class="sp-m"></div><a class="btn ghost sm" onclick="return false">Line sheet</a> <a class="btn ghost sm" onclick="return false">Trade deck</a></div>
+    <div style="border:var(--line-w) solid var(--lc);padding:20px;background:#e4e7ea"><h3>Trade enquiry</h3><div class="sp-s"></div><div style="height:37px;background:#fff;border:var(--line-w) solid var(--lc);margin-bottom:10px"></div><div style="height:37px;background:#fff;border:var(--line-w) solid var(--lc);margin-bottom:10px"></div><div style="height:37px;background:#fff;border:var(--line-w) solid var(--lc);margin-bottom:10px"></div><div style="height:84px;background:#fff;border:var(--line-w) solid var(--lc);margin-bottom:10px"></div><a class="btn" onclick="return false">Send enquiry</a></div></div><div class="sp-xl"></div></div>`;}
+
+/* ---- TILES / MEGA / BAG ---- */
+const tileHTML=f=>{const T=THEMES[f.id]||{};const st=T.tile?` style="--ph:${T.tile};--lab-c:${T.body};--labt-c:${T.mut}"`:"";return `<a class="ptile" data-p="${f.id}"${st} onclick="go('#/fragrance/${f.id}')">${mediaConcept(f,"","IMG")}<div class="meta"><span class="t-price"><span class="price">${price()}</span><span class="caption">100 ml</span></span>${plogo(f)}<span class="t-occ caption">${f.occasion}</span></div></a>`;};
+function fillTiles(id){const t=document.getElementById(id);if(t)t.innerHTML=FRAGRANCES.map(tileHTML).join("");}
+function fillMega(){document.getElementById("megaCards").innerHTML=FRAGRANCES.map(f=>`<a class="m-card" onclick="go('#/fragrance/${f.id}')">${mediaConcept(f,"","IMG")}${plogo(f,"mlogo")}</a>`).join("");}
+function openMega(){document.getElementById("mega").classList.add("open");document.getElementById("scrim").classList.add("open");document.getElementById("fragBtn").classList.add("on");}
+function closeMega(){document.getElementById("mega").classList.remove("open");document.getElementById("scrim").classList.remove("open");document.getElementById("fragBtn").classList.remove("on");}
+document.getElementById("fragBtn").onclick=()=>{if(designMode)return;document.getElementById("mega").classList.contains("open")?closeMega():openMega();};
+
+let CART=[];
+function addToBag(id){if(designMode)return;const it=CART.find(x=>x.id===id);if(it)it.qty++;else CART.push({id,qty:1});renderBag();openBag();}
+function bagQty(id,d){const it=CART.find(x=>x.id===id);if(!it)return;it.qty+=d;if(it.qty<=0)CART=CART.filter(x=>x.id!==id);renderBag();}
+const bagCount=()=>CART.reduce((s,i)=>s+i.qty,0);
+function renderBag(){
+  document.getElementById("bagLink").textContent="Bag ("+(bagCount()||" ")+")";
+  const body=document.getElementById("bagBody"),ft=document.getElementById("bagFt");
+  if(!CART.length){body.innerHTML='<div class="bag-empty">Your bag is empty.</div>';ft.innerHTML="";return;}
+  body.innerHTML=CART.map(i=>{const f=F(i.id);return `<div class="bag-item"><span class="bi-logo${f.two?' two':''}">${PLOGO_SVG[f.id]}</span><div><div class="caption">${f.type}</div><div style="margin-top:4px"><button class="qbtn" onclick="bagQty('${f.id}',-1)">−</button> ${i.qty} <button class="qbtn" onclick="bagQty('${f.id}',1)">+</button></div></div><div class="bi-r">${CUR}${PRICE_VAL*i.qty}</div></div>`;}).join("");
+  const total=CART.reduce((s,i)=>s+i.qty*PRICE_VAL,0);
+  ft.innerHTML=`<div class="row"><span>Subtotal</span><span>${CUR}${total}</span></div><a class="btn" style="width:100%;text-align:center" onclick="return false">Checkout</a><div class="caption" style="margin-top:8px;text-align:center">Shipping and taxes at checkout.</div>`;
+}
+function openBag(){closeMega();document.getElementById("bag").classList.add("open");document.getElementById("bagScrim").classList.add("open");paintButtons();}
+function closeBag(){document.getElementById("bag").classList.remove("open");document.getElementById("bagScrim").classList.remove("open");}
+const curBtn=document.getElementById("curBtn"),curMenu=document.getElementById("curMenu"),CURLABEL={"£":"GBP £","$":"USD $","€":"EUR €"};
+curBtn.onclick=e=>{if(designMode)return;e.stopPropagation();curMenu.classList.toggle("open");};
+curMenu.querySelectorAll("button").forEach(b=>b.onclick=()=>{CUR=b.dataset.c;curBtn.textContent=CURLABEL[CUR];curMenu.querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));curMenu.classList.remove("open");renderBag();router();});
+document.addEventListener("click",e=>{if(curMenu.classList.contains("open")&&!curMenu.contains(e.target)&&e.target!==curBtn)curMenu.classList.remove("open");});
+
+/* image uploads (session preview + slot→filename map for JSON) */
+let IMAGES={};const IMG_URLS={};let uploadTarget=null;
+function applyUploads(){document.querySelectorAll(".ph[data-slot]").forEach(p=>{const u=IMG_URLS[p.dataset.slot];if(u){p.style.backgroundImage=`url(${u})`;p.style.backgroundSize="cover";p.style.backgroundPosition="center";p.classList.add("has-img");}});}
+document.addEventListener("click",e=>{const up=e.target.closest(".ph-up");if(!up)return;e.preventDefault();e.stopPropagation();uploadTarget=up.closest(".ph");document.getElementById("imgUpload").click();},true);
+document.getElementById("imgUpload").onchange=e=>{const f=e.target.files[0];if(!f||!uploadTarget)return;const url=URL.createObjectURL(f),slot=uploadTarget.dataset.slot;IMG_URLS[slot]=url;IMAGES[slot]=f.name;uploadTarget.style.backgroundImage=`url(${url})`;uploadTarget.style.backgroundSize="cover";uploadTarget.style.backgroundPosition="center";uploadTarget.classList.add("has-img");saveAll();e.target.value="";};
+
+
+function scrollDoc(id){const el=document.getElementById(id);if(el)window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-90,behavior:"smooth"});}
+function setupDocNav(){
+  if(window._docObs)window._docObs.disconnect();
+  const body=document.querySelector(".doc-body"); if(!body)return;
+  const secs=[...body.querySelectorAll("section[id]")];
+  const links=[...document.querySelectorAll(".doc-nav a")];
+  const setActive=id=>links.forEach(l=>l.classList.toggle("on",l.dataset.t===id));
+  links.forEach(l=>l.onclick=()=>{const el=document.getElementById(l.dataset.t);if(el){window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-90,behavior:"smooth"});}});
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting)setActive(e.target.id);});},{rootMargin:"-90px 0px -72% 0px",threshold:0});
+  secs.forEach(x=>obs.observe(x)); window._docObs=obs;
+  if(secs.length)setActive(secs[0].id);
+}
+const DOCNAV=items=>`<nav class="doc-nav"><div class="dn-t">On this page</div>${items.map(i=>`<a data-t="${i[0]}">${i[1]}</a>`).join("")}</nav>`;
+
+function viewTOV(){
+  const nav=[["brief","Brand in brief"],["tension","The core tension"],["personality","Personality"],["behaviour","How each fragrance behaves"],["voice","How the voice sounds"],["cadence","Cadence to avoid"],["register","Register by channel"],["dials","The two dials"],["words","Words and moves"],["rules","Hard rules"],["fragrances","The three fragrances"],["examples","Worked examples"]];
+  return `<div class="doc">${DOCNAV(nav)}<div class="doc-body">
+  <div class="kicker">Cooee — brand guidelines</div><div class="sp-s"></div>
+  <h1>Tone of voice</h1>
+  <p class="lede doc-lede">How Cooee writes. Refined and informal at once: written with discipline about real things, sentences kept clean, letting what they describe carry the weight.</p>
+
+  <section id="brief"><h2>Brand in brief</h2>
+  <p>Cooee is an Australian fragrance house. Three fragrances, one olfactive spine, formulated and hand-blended in small batches. The formulas do not change. The brand is premium — top quality, credible, refined — and unmistakably Australian: a little laid-back, not precious, made by and for real people, and comfortable being deliberately imperfect.</p></section>
+
+  <section id="tension"><h2>The core tension</h2>
+  <p>Refined and informal at once. The premium side shows up as restraint and genuinely good materials. The Australian side shows up as honesty, warmth and a lack of fuss. One rule holds it together: write with discipline about real things, keep the sentences clean, and let what they describe carry the weight.</p></section>
+
+  <section id="personality"><h2>Personality</h2>
+  <p>Four pillars, each with a way it shows up on the page.</p>
+  <table class="doc-table"><thead><tr><th>Pillar</th><th>How it shows up</th></tr></thead><tbody>
+  <tr><td><span class="nm">Credible</span><br>sophisticated</td><td>Harmonious blends, refinement drawn from genuinely good materials. Sound like you know the subject, because you do. Never announce sophistication — demonstrate it, then stop.</td></tr>
+  <tr><td><span class="nm">Down-to-earth</span><br>generous</td><td>Direct, forthright writing. Fragrances that smell of what they say they do. Honesty as not skimping on materials, and honesty about how a scent actually wears — its strength and its length.</td></tr>
+  <tr><td><span class="nm">Uninhibited</span><br>free-spirited</td><td>A touch of uncensored expression. Nature, moments and emotions as they actually are — not tidied up or idealised the way most perfumery is. A bit of cheek where the channel invites it.</td></tr>
+  <tr><td><span class="nm">Open</span><br>welcoming</td><td>Warm, curious and unguarded. Open about its materials and how they are made, where most of the industry stays cagey. Generous and easy to approach, never gatekeeping.</td></tr>
+  </tbody></table></section>
+
+  <section id="behaviour"><h2>How each fragrance behaves</h2>
+  <p>Each fragrance carries a clear scent signature expressible in three or four key materials — that alone should hold both the personality and the tension. Each is a real, experienced moment translated into modern Australian life. And each smells like what it claims to: concept-to-smell fidelity is the priority. If a blind wearer could not recognise the place or moment from the scent alone, the copy has overreached. Every fragrance aspires to be memorable, diffusive, addictive, clear in intention, creative and wearable.</p></section>
+
+  <section id="voice"><h2>How the voice sounds</h2>
+  <p>Lead with the feeling and the story — the specific moment the fragrance is about. Keep the writing warm and plain, the way you would talk to someone you like and respect. Let the materials and the chemistry sit underneath, and bring them in only where they earn their place. They are support, not the headline. A product page can go deeper than a pack, and a sales-assistant note deeper again, but the concept comes first every time. Warmth comes from being specific and sounding like a person, not from adjectives or punctuation.</p>
+  <p>The rhythm is relaxed with an occasional Australian lift. Use idiom lightly — enough that an Australian clearly wrote this, not so much that it reads like a tourism ad. Enthusiasm stays understated: genuine and a bit generous, never hyped.</p></section>
+
+  <section id="cadence"><h2>Cadence to avoid</h2>
+  <p>Cadence is the quickest way for copy to sound like it is working hard to sound clever. Steer clear of these:</p>
+  <ul>
+  <li>The this-not-that flip — "It isn't a fragrance, it's a feeling." No antithesis constructions.</li>
+  <li>Fragment-stacking for effect — "Warm. Bright. Yours." No one- or two-word sentences used as punctuation.</li>
+  <li>Dropping the subject for effect — "Three, for now." Write complete sentences; a dropped subject is the quickest way to sound pretentious.</li>
+  <li>Precious flourishes — personifying materials, cute understatement. Say it plainly instead.</li>
+  <li>The rule of three — three-part parallel lists and tricolon sentences. Break the pattern: two, or four, or something uneven.</li>
+  <li>The dramatic em-dash dropped in for a beat. A comma or a full stop usually does the job.</li>
+  <li>Rhetorical question then answer — "The best part? It lasts." Just say the thing.</li>
+  <li>Grand closers — "Because some moments are worth holding onto." End plainly.</li>
+  <li>"Isn't just", "more than just", "not merely", and colon-then-punchline setups built only to sound clever.</li>
+  </ul>
+  <p class="sub">Same idea, written badly then the way Cooee should</p>
+  <div class="doc-ba"><div class="bad">"This isn't sunscreen. It's a feeling. Warm. Golden. Yours."</div><div>Sun Skin is that warm, slowed-down feeling of late afternoon sun on your skin.</div></div>
+  <div class="doc-ba"><div class="bad">"Blue cypress, bergamot, sandalwood — the coast, captured. Because some mornings deserve to be worn."</div><div>Blue cypress and bergamot open it up, then Australian sandalwood settles in warm and dry. It smells like the coast first thing.</div></div>
+  <div class="doc-ba"><div class="bad">"The best part? It lasts all evening."</div><div>It holds through the evening.</div></div></section>
+
+  <section id="register"><h2>Register by channel</h2>
+  <p>Register is a dial, not a fixed setting. The default lean is relaxed and plain — Australian in attitude rather than vocabulary — and it flexes by channel while the personality stays constant.</p>
+  <table class="doc-table"><thead><tr><th>Channel</th><th>Register</th></tr></thead><tbody>
+  <tr><td><span class="nm">Outer packaging</span></td><td>Most restrained. Still and certain. One or two precise images, one or two real material names. Very short.</td></tr>
+  <tr><td><span class="nm">Insert / inner card</span></td><td>Slightly expansive; fragments welcome. Room for the concept, the materials and honest context — where a material like Geosmin can earn its full name.</td></tr>
+  <tr><td><span class="nm">Product page</span></td><td>Sommelier register, warmth through specificity. Concept first, materials woven through, performance stated plainly. For the curious, not the unconvinced.</td></tr>
+  <tr><td><span class="nm">About / brand story</span></td><td>Most personal. Reveal decisions, not biography — why the choices matter, not that they do.</td></tr>
+  <tr><td><span class="nm">Email</span></td><td>Direct to the point of informality. The subject line is the content itself. The first sentence says what the email is about. No warmup.</td></tr>
+  <tr><td><span class="nm">Social</span></td><td>Very short. The image carries the weight; the copy adds one fact it cannot. The loosest register, still refined. No hashtags, no emoji.</td></tr>
+  </tbody></table></section>
+
+  <section id="dials"><h2>The two dials</h2>
+  <p class="sub">Exclamation marks</p>
+  <p>Kept rare, and never on the pack or product pages. The warmth belongs in word choice, not punctuation. If an email or a social post feels flat, one occasional mark is allowed.</p>
+  <p class="sub">How Australian</p>
+  <p>The default is relaxed with light idiom — Australian in attitude more than in vocabulary. Social is the one channel that can go a little more vernacular ("late arvo", say) without denting the premium read. Packaging stays the most restrained of all.</p></section>
+
+  <section id="words"><h2>Words and moves</h2>
+  <p class="sub">Lean into</p>
+  <p>Concrete material names; real places and times of day; temperature and texture; plain, physical verbs; short declaratives; specificity over adjective stacks; the occasional honest caveat.</p>
+  <p class="sub">Avoid</p>
+  <p>Indulge, pamper, luxurious, journey, elevate, unleash, captivating, alluring, sensorial, "olfactory experience", "escape" as cliché, "evoke" as filler, and "notes of…" as padding. Avoid the word "perfect" and the idea of perfection generally.</p></section>
+
+  <section id="rules"><h2>Hard rules</h2>
+  <ul>
+  <li>Never open with "A fragrance that…" (or "A scent that…", "An eau de… that…").</li>
+  <li>Geosmin is "mineral" on pack; its full name and the petrichor story are allowed only in insert, digital or sales-assistant copy.</li>
+  <li>State performance plainly and signal the drydown so no one is disappointed; never oversell longevity.</li>
+  <li>No hashtags and no emoji.</li>
+  <li>Keep exclamation marks rare, and off the pack and product pages entirely.</li>
+  <li>Do not idealise, and steer clear of generic-luxury and generic-perfume cliché.</li>
+  </ul></section>
+
+  <section id="fragrances"><h2>The three fragrances</h2>
+  <p class="sub">Cooee Cologne — Eau de Toilette</p>
+  <p>"Saturdays at the surf club." A green-resinous coastal morning: Blue Cypress from Darwin opens, Bergamot brightens, Australian Sandalwood settles into a dry warmth carried on mineral air that is hard to name but instantly recognisable. It must smell like a place, not a product — real light, real landscape. "Mineral" on pack; the Geosmin story off-pack.</p>
+  <p class="sub">Sun Skin — Eau de Parfum</p>
+  <p>"Nourished by sun." Not sunscreen — the specific moment late-afternoon warmth sinks into bare skin and you stop, present. Turmeric Leaf and Magnolia open green, citrus and tropical; Cashmeran and the solar salicylate bed radiate outward, diffuse and spacious. Never resolve the warm-and-fresh tension into "warm" alone. Turmeric leaf is the leaf — green, citrus, tropical — not the kitchen spice.</p>
+  <p class="sub">Aperitivo — Eau de Parfum</p>
+  <p>"The night before it begins." Anticipation and transformation — the darkly anticipatory moment before a night unfolds, not the drink. Blackcurrant and Blue Cypress open green and resinous, violet and iris turn through the heart, Cypriol brings leathered woody texture and a macrocyclic musk closes warm and radiant. No rose, no saffron, no conventional oud. The name reads golden-hour; the formula is nocturnal, and the darker reading is carried deliberately.</p></section>
+
+  <section id="examples"><h2>Worked examples</h2>
+  <p>Copy that landed in testing — the reference for voice, length and rhythm across channels. Each leads with the feeling, keeps materials in support, and stays clear of the cadence above.</p>
+  <p class="sub">Front-of-pack — Cooee Cologne</p>
+  <p>Saturdays at the surf club.</p>
+  <p class="sub">Back-of-pack — Sun Skin</p>
+  <p>The warmth of late afternoon, the kind that sinks into your skin and slows everything down. Turmeric leaf and magnolia keep it green and bright while a soft, sunlit warmth stays close for hours. Made and blended by hand, in small batches.</p>
+  <p class="sub">Insert card — Cooee Cologne</p>
+  <p>You know the smell of the air near the coast on a clear morning: green and a little resinous, with something mineral underneath you cannot quite name. That mineral part is geosmin, the molecule behind the smell of rain on dry ground. Blue cypress from Darwin opens it up and bergamot lifts it, then Australian sandalwood settles in warm and dry. Made and blended by hand, in small batches.</p>
+  <p class="sub">Product page — Aperitivo</p>
+  <p>That hour before the night really starts. It is the pause before you head out, when you have decided the night is going to be a good one. Blackcurrant and blue cypress open dark and green. Violet softens the middle before a warm musk takes over and stays close, long after the first drink. It holds through the evening. There is no rose or saffron in it, none of the big-night clichés.</p>
+  <p class="sub">Email — launch</p>
+  <p>Subject: The first three Cooee fragrances are ready<br>We have been working on these for a while and they are finally ready to wear. Three scents, each built around a particular Australian moment: a coast morning, late-afternoon sun, and the start of a good night out.</p>
+  <p class="sub">Social — Sun Skin</p>
+  <p>Sun Skin. That warm, slowed-down feeling of late afternoon sun on your skin. The green note up top is turmeric leaf — the leaf, not the kitchen spice.</p></section>
+  </div></div>`;
+}
+
+function viewSnapshot(){
+  const nav=[["proposition","The proposition"],["founder","Founder and origin"],["name","The name"],["range","The range"],["dna","Brand DNA and personality"],["roots","Roots and positioning"],["spine","The strategic spine"],["voice","Tone of voice"],["journeys","Customer journeys"],["direction","Art direction"],["consistency","Points to keep consistent"],["notes","Notes"]];
+  const fn=id=>{const n=id.replace("note","");return `<sup class="fn" id="ref${n}" onclick="scrollDoc('${id}')">${n}</sup>`;};
+  return `<div class="doc">${DOCNAV(nav)}<div class="doc-body">
+  <div class="kicker">Cooee — brand snapshot</div><div class="sp-s"></div>
+  <h1>Brand snapshot</h1>
+  <p class="lede doc-lede">Three Australian fragrances, one olfactive spine, hand-blended in small batches — and a commitment never to reformulate them. This is the brand in full: proposition, origin, range, DNA and the strategy underneath it.</p>
+
+  <section id="proposition"><h2>The proposition</h2>
+  <p>Three fragrances, one olfactive spine, formulated and hand-blended in small batches, with an explicit no-reformulation commitment. Australian in origin and reference. Independent, and built to feel genuinely premium while staying open and unpretentious. The range extends across three occasions — everyday, afternoon, night — and can grow without a rebuild.</p></section>
+
+  <section id="founder"><h2>Founder and origin</h2>
+  <p>Cooee is made by Michael — born and raised in Adelaide, now based in London — a solo perfumer building the brand himself. The founding motive is simple: there is no truly Australian perfume brand, so he is making one.</p>
+  <p>Michael's background is in coffee, as founder of two B-Corp coffee brands, which points to a considered ethical and sustainable stance (to confirm). Cooee is independent, and one of its jobs is to prove that independent can still feel premium.</p>
+  <p>The range is priced at a premium level — exact RRP to confirm (roughly&nbsp;? tier).</p></section>
+
+  <section id="name"><h2>The name</h2>
+  <p>Cooee is a familiar Australian word — a bush call, roughly "come here", used to reach someone across distance. The brand uses it lightly, as a common Australian word, and deliberately does not build its story on etymology or foreground the word's origins.${fn("note1")}</p></section>
+
+  <section id="range"><h2>The range</h2>
+  <p>The three fragrances map onto occasion — everyday, afternoon, night — and onto a gradient from accessible entry to signature. Each has a target persona drawn from the consumer work. The three concept lines are final and printed on the packaging.</p>
+  <table class="doc-table"><thead><tr><th>Fragrance</th><th>Concept line</th><th>Hero materials</th><th>Persona</th><th>Occasion</th></tr></thead><tbody>
+  <tr><td><span class="nm">Cooee Cologne</span><br>Eau de Toilette</td><td>Saturdays at the surf club</td><td>Blue Cypress, Bergamot, Australian Sandalwood; mineral air (Geosmin, "mineral" on pack)</td><td>The Naturalistic Escapist — concept-first, place and memory</td><td>Everyday, accessible entry</td></tr>
+  <tr><td><span class="nm">Sun Skin</span><br>Eau de Parfum</td><td>Nourished by sun</td><td>Turmeric Leaf, Magnolia, Cashmeran, solar salicylate bed</td><td>The Sensual Naturalist — sensual minimalist meets naturalistic escapist</td><td>Afternoons, leisure</td></tr>
+  <tr><td><span class="nm">Aperitivo</span><br>Eau de Parfum</td><td>The night before it begins</td><td>Blue Cypress, Blackcurrant, Violet / Iris, Cypriol, macrocyclic musk</td><td>The Dark Feminine Archetype, with the Textural Adventurer alongside</td><td>Nights out, signature</td></tr>
+  </tbody></table>
+  <p>The launch range is these three. Skinny Dip is legacy, folded into what became Cooee Cologne; candles are on hold and may resurface later.${fn("note2")} A slightly earlier cut of the pack copy differs on two materials — it leads Aperitivo on Fir Balsam and drops Sun Skin's solar-salicylate line — where the current brief leads on Blue Cypress and keeps the salicylate bed.${fn("note3")}</p></section>
+
+  <section id="dna"><h2>Brand DNA and personality</h2>
+  <p>The core tension is <span class="nm">refined and informal</span> at the same time — modern cities and wild country, side by side. Four personality pillars sit under it, each with an olfactory reading.</p>
+  <table class="doc-table"><thead><tr><th>Pillar</th><th>How it shows up, in scent and on the page</th></tr></thead><tbody>
+  <tr><td><span class="nm">Credible</span><br>sophisticated</td><td>Harmonious blending and small touches of refinement from genuinely good materials. Demonstrated, never announced.</td></tr>
+  <tr><td><span class="nm">Down-to-earth</span><br>generous</td><td>Direct, forthright compositions that smell of what they say they do. Honesty as not skimping on materials, and honesty about strength and length.</td></tr>
+  <tr><td><span class="nm">Uninhibited</span><br>free-spirited</td><td>Uncensored expression; an arresting nod to nature, moments and emotions as they actually exist, not as idealised in modern perfumery.</td></tr>
+  <tr><td><span class="nm">Open</span><br>welcoming</td><td>Warmth, curiosity and no gatekeeping; the brand explains itself and stays candid about materials and methods where the industry stays secretive.${fn("note4")}</td></tr>
+  </tbody></table>
+  <p>Shared across the range: every fragrance carries a clear scent signature expressible in three or four key materials that holds both the personality and its internal tension; each is a real, experienced moment translated into a modern Australian lifestyle; and each aims to be memorable, diffusive, addictive, clear in olfactive intention, creative and wearable. "Smell of what they say they do" is the concept-to-smell fidelity that the strategy names as the commercial priority; "refined and informal" is the tone-of-voice register. The DNA has held consistent across four years rather than drifting.</p></section>
+
+  <section id="roots"><h2>Roots and positioning</h2>
+  <p>"Refined informality" is the founding idea, not a later invention — the original strategy opens on "Outdoors. Pause. Refined and informal fragrance" and lands on "Refined Informality" as the brand idea.${fn("note5")} The tension is the real spine.</p>
+  <p>Under it sits a purpose that the later material leaves implicit: <span class="nm">the pause</span>. The stated aim is to create moments to pause, reflect and refresh — a moment of focus that takes you out of the future or the past. All three product concepts are pause-moments, and the purpose is worth restating in the About page and homepage rather than leaving it to inference.</p>
+  <p>The original positioning is sharp, and arguably clearer than any later performance framing: a refreshing counterpoint to the rigidity and austerity of premium perfumery — something that reminds you what it is to feel free. The enemy is contrived, austere, pretentious, secretive perfumery. Transparency is the answer: openness about materials (the root of naming real materials and telling the Geosmin story) and an independent brand that genuinely feels premium.</p></section>
+
+  <section id="spine"><h2>The strategic spine</h2>
+  <p>The brief and the consumer work are built to answer each other: every complaint the market work isolates is met by a Cooee formula decision or brand promise.</p>
+  <p class="sub">Performance is the number-one unmet need, and the answer is structural</p>
+  <p>Competitors' openings create the emotional experience, then evaporate into a character-free musk skeleton. Cooee's answer is built in: distinctive materials live in the base, not only the top — the Cashmeran-salicylate tension in Sun Skin, the ionone chord and macrocyclic musk in Aperitivo, the fir and Geosmin register in the Cologne.</p>
+  <p class="sub">Concept-to-smell fidelity is the commercial priority</p>
+  <p>A fragrance that smells exactly like its name. A blind sniff of Cooee Cologne should read as "outside, near the coast" without being told the concept. If it does not, the brief has failed.</p>
+  <p class="sub">Formula permanence and no discontinuation</p>
+  <p>Pre-committed promises. The market runs on reformulation grief and a discontinuation-grief economy; a new independent house can make and keep this commitment in a way that acquired houses cannot — and it speaks straight to the customers who build an identity around a scent.</p>
+  <p class="sub">Distinctiveness resists the dupe economy</p>
+  <p>Unusual naturalistic materials at genuine concentration — Geosmin, Douglas Fir, Blue Cypress, Turmeric Leaf, Carrot Seed — take sourcing and handling knowledge that resists easy cloning. The flicker of the wild generates formula distinctiveness as a by-product.</p></section>
+
+  <section id="voice"><h2>Tone of voice</h2>
+  <p>The personality stays constant; the register flexes by channel. Packaging is most restrained; the insert can be more expansive; the product page is a sommelier register, concept first with materials woven through; the About page is most personal; email is direct to the point of informality; social is very short, letting the image carry the weight. The full voice, with worked examples, is set out in the Tone of voice document.</p></section>
+
+  <section id="journeys"><h2>Customer journeys</h2>
+  <p>Two paths, and both start on Instagram and make a credibility stop at Fragrantica and Basenotes.</p>
+  <p class="sub">Specialist retailer (trade)</p>
+  <p>Inbound via referral or press to Instagram, then Fragrantica or Basenotes, then the website; or outbound and cold, with the deck doing the work. Both converge at the trade deck, then sample delivery, unboxing, wholesale fulfilment and point of sale.</p>
+  <p class="sub">Direct to consumer</p>
+  <p>Instagram-led discovery, conversion on the product page — profile grid to Fragrantica or Basenotes to product pages to checkout and unboxing — then post-purchase reviews, email and referral.</p></section>
+
+  <section id="direction"><h2>Art direction</h2>
+  <p>Australian nature framed as pervasive, wild, beautiful, untamed — bold, direct, loud. Touchstones: the photographer Max Dupain (the "Sunbaker" register especially, which rhymes with Sun Skin), the painter Sidney Nolan, the artist Ken Done, and the artist and photographer Tracey Moffatt.${fn("note6")}</p>
+  <p>Avoid lab and perfume-counter aesthetics entirely. Use outdoor environments, real light and real landscape. Sun Skin is warmth as sensation, not a beach-lifestyle or SPF product. Aperitivo is dark, atmospheric and cinematic.</p></section>
+
+  <section id="consistency"><h2>Points to keep consistent</h2>
+  <ul>
+  <li><span class="nm">Aperitivo's framing.</span> The name conjures light, bitter, golden hour; the formula is nocturnal. The name is final — already on the bottles — so the levers are art direction and copy. Carry the transformation: the aperitivo moment becoming the night, never softened into a light aperitif.</li>
+  <li><span class="nm">Geosmin.</span> "Mineral" on pack; the full name and the petrichor story only in insert, digital and sales-assistant copy. Leave room in the design for the story to land.</li>
+  <li><span class="nm">Performance signalled in copy.</span> State the drydown up front — "mineral air, skin musk" for the Cologne — so the wear is never a disappointment.</li>
+  <li><span class="nm">Sun Skin.</span> Warmth as sensation; never let the warm-and-fresh duality read as merely "warm", and explain that turmeric leaf is the leaf — green, citrus, tropical — not the kitchen spice.</li>
+  </ul></section>
+
+  <section id="notes"><h2>Notes</h2>
+  <ol class="doc-notes">
+  <li id="note1">The name's deeper etymology was explored in Michael's 2022 material but the deliberate current decision is to keep it light and not foreground it. Held here as a settled decision rather than a story to tell. <a class="fn-back" onclick="scrollDoc(\'ref1\')" title="Back to text">↑</a></li>
+  <li id="note2">From the earlier product architecture, which tiered the line and carried a fourth scent (Skinny Dip) and a candle range. Skinny Dip is now folded into Cooee Cologne, the tier labels are dropped, and candles are parked — kept out of current scope, but the site is designed so the range can extend without a rebuild. <a class="fn-back" onclick="scrollDoc(\'ref2\')" title="Back to text">↑</a></li>
+  <li id="note3">From a slightly earlier cut of the pack copy. Where it diverges from the current brief on hero materials, defer to the brief. Flagged so the difference is reconciled deliberately, not by accident. <a class="fn-back" onclick="scrollDoc(\'ref3\')" title="Back to text">↑</a></li>
+  <li id="note4">The Open pillar is carried over from Michael's 2022 positioning deck, which had four pillars; an interim version of the DNA kept three. Reinstated here because it holds the warmth and the openness-about-materials stance — worth a deliberate call to confirm it stays. <a class="fn-back" onclick="scrollDoc(\'ref4\')" title="Back to text">↑</a></li>
+  <li id="note5">From Michael's original positioning and strategy deck (2022, written with his partner, before the current brief). Thinking has evolved since, but this is the genuine root of the brand. Where it conflicts with the current brief, the brief takes precedence. <a class="fn-back" onclick="scrollDoc(\'ref5\')" title="Back to text">↑</a></li>
+  <li id="note6">Michael's own art-direction references, from the early material and the brief. Useful as a mood for imagery rather than a fixed shot list. <a class="fn-back" onclick="scrollDoc(\'ref6\')" title="Back to text">↑</a></li>
+  </ol></section>
+  </div></div>`;
+}
+
+/* ---- ROUTER ---- */
+function setNav(m){document.querySelectorAll(".nav-in a[data-m]").forEach(a=>a.classList.toggle("on",a.dataset.m===m));}
+function router(){
+  closeMega();
+  const parts=(location.hash||"#/home").replace(/^#\//,"").split("/");const v=parts[0]||"home";window.scrollTo(0,0);document.body.classList.toggle("home",v==="home");document.body.setAttribute("data-view",v);
+  if(v==="home"){app.innerHTML=viewHome();fillTiles("homeTiles");setNav("");}
+  else if(v==="fragrances"){app.innerHTML=viewFragrances();fillTiles("fragTiles");setNav("");}
+  else if(v==="fragrance"){app.innerHTML=viewPDP(parts[1]);setNav("");}
+  else if(v==="brand"){app.innerHTML=viewBrand();setNav("brand");}
+  else if(v==="discovery"){app.innerHTML=viewDiscovery();setNav("");}
+  else if(v==="stockists"){app.innerHTML=viewStockists();setNav("");}
+  else if(v==="tone-of-voice"){app.innerHTML=viewTOV();setNav("");}
+  else if(v==="brand-snapshot"){app.innerHTML=viewSnapshot();setNav("");}
+  else{app.innerHTML=viewHome();fillTiles("homeTiles");setNav("");}
+  applyTheme((v==="fragrance"&&TOG.themes)?parts[1]:null);
+  paintButtons();applyUploads();applySections(v);if(v==="tone-of-voice"||v==="brand-snapshot")setupDocNav();
+  const mn=document.querySelector("main");mn.classList.remove("pagein");void mn.offsetWidth;mn.classList.add("pagein");
+}
+function go(hash){if(designMode)return;if(location.hash===hash)router();else location.hash=hash;}
+window.addEventListener("hashchange",router);
+
+/* ---- SETTINGS ---- */
+const VARGROUPS=[
+  {title:"Layout",controls:[{k:"--margin",label:"Side margin",min:0,max:80,step:2,unit:"px"},{k:"--gutter",label:"Gutter",min:0,max:40,step:1,unit:"px"}]},
+  {title:"Vertical spacing",controls:[{k:"--nav-gap",label:"Top gap (under nav)",min:0,max:160,step:4,unit:"px"},{k:"--sp-xl",label:"Section gap XL",min:24,max:200,step:4,unit:"px"},{k:"--sp-l",label:"Section gap L",min:16,max:140,step:4,unit:"px"},{k:"--sp-m",label:"Gap M",min:8,max:80,step:2,unit:"px"},{k:"--sp-s",label:"Gap S",min:2,max:48,step:2,unit:"px"}]},
+  {title:"Divider line",controls:[{k:"--line-w",label:"Weight",min:0,max:4,step:.5,unit:"px"},{k:"--line-op",label:"Opacity",min:0,max:100,step:1,unit:""},{swatch:"--line-c",label:"Colour",opts:["#e4e7ea","#d3d7dc","#c2c6cc","#a9afb6","#1b1d20"]}]},
+  {title:"Intro copy",controls:[{varsel:"--intro-align",label:"Text align",opts:[["center","Centre"],["left","Left"]]},{k:"--intro-w",label:"Text width",min:280,max:1180,step:10,unit:"px"},{k:"--intro-pl",label:"Distance from left",min:0,max:200,step:4,unit:"px"}]},
+  {title:"Logos",controls:[{k:"--navlogo",label:"Menu logo",min:12,max:40,step:1,unit:"px"},{k:"--plogo",label:"Product logo",min:14,max:48,step:1,unit:"px"}]},
+  {title:"Image scrim",controls:[{k:"--shadow-op",label:"Behind type",min:0,max:100,step:1,unit:""}]},
+  {title:"Blocks",controls:[{k:"--pillar-h",label:"Pillar height",min:15,max:70,step:1,unit:"vh"},{k:"--spot-ic",label:"Icon circle",min:40,max:160,step:2,unit:"px"}]},
+  {title:"Buttons",controls:[{choice:"shape",label:"Shape",opts:[["rect","Rectangular"],["pebble","Pebble"]]},{k:"--btn-radius",label:"Corner radius",min:0,max:40,step:1,unit:"px"},{k:"--btn-stroke",label:"Stroke weight",min:0,max:5,step:.25,unit:"px"}]},
+  {title:"Product",controls:[{tog:"themes",label:"Colour themes (PDP)"}]},
+  {title:"Header",controls:[{tog:"navProducts",label:"Product nav (centre)"}]},
+  {title:"Footer",controls:[{tog:"footerLogo",label:"Big logo"}]},
+  {title:"Build notes",controls:[{tog:"notes",label:"In-text notes"},{tog:"bar",label:"Top schematic bar"},{tog:"img",label:"Image descriptions"}]}
+];
+const DEF_VARS={"--margin":"20px","--gutter":"10px","--sp-xl":"100px","--sp-l":"100px","--sp-m":"40px","--sp-s":"14px","--navlogo":"23px","--plogo":"20px","--line-w":"1px","--line-c":"#d3d7dc","--img-hero":"65vh","--img-tile":"50vh","--img-story":"50vh","--img-portrait":"50vh","--img-wide":"42vh","--img-tall":"70vh","--ph":"#d9dde2","--shadow-op":"0","--btn-radius":"0px","--btn-stroke":"0.5px","--btn-stroke-c":"#7c8d9d","--btn-fill":"#1b1d20","--pillar-h":"35vh","--spot-ic":"152px","--line-op":"100","--img-pack":"78vh","--intro-align":"center","--intro-pl":"0px","--intro-w":"720px","--nav-gap":"56px"};
+const TOGDEF={notes:false,bar:false,img:true,footerLight:true,footerLogo:true,themes:true,navProducts:false};
+let TOG=Object.assign({},TOGDEF),designMode=false,SHAPE="pebble";
+function pebblePath(w,h,r,k){r=Math.max(0,Math.min(r,h/2-1,w/2-1));k=Math.max(0,Math.min(k,h*0.2));return `M ${r} ${k} Q ${w/2} 0 ${w-r} ${k} A ${r} ${r} 0 0 1 ${w} ${r+k} L ${w} ${h-r-k} A ${r} ${r} 0 0 1 ${w-r} ${h-k} Q ${w/2} ${h} ${r} ${h-k} A ${r} ${r} 0 0 1 0 ${h-r-k} L 0 ${r+k} A ${r} ${r} 0 0 1 ${r} ${k} Z`;}
+function paintButtons(){const btns=document.querySelectorAll(".btn");if(SHAPE!=="pebble"){btns.forEach(b=>{b.classList.remove("pebbled");const s=b.querySelector(".btn-svg");if(s)s.remove();});return;}const rad=parseFloat(curVar("--btn-radius"))||10;btns.forEach(b=>{const w=b.offsetWidth,h=b.offsetHeight;if(!w||!h)return;b.classList.add("pebbled");let svg=b.querySelector(".btn-svg");if(!svg){svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("class","btn-svg");svg.setAttribute("preserveAspectRatio","none");b.insertBefore(svg,b.firstChild);}svg.setAttribute("viewBox",`0 0 ${w} ${h}`);svg.innerHTML=`<path d="${pebblePath(w,h,rad,Math.max(2,h*0.09))}"/>`;});}
+function applyShape(){paintButtons();}
+function softRerender(){const y=window.scrollY;router();window.scrollTo(0,y);}
+let SECT={};
+function applySections(key){
+  const app=document.getElementById("app");
+  const secs=[...app.querySelectorAll("section.sec")];
+  const list=document.getElementById("seclist");
+  if(!secs.length){list.innerHTML='<div style="color:var(--mut);font-size:12px">No editable sections on this page yet.</div>';return;}
+  const st=SECT[key]||{}, hidden=new Set(st.hidden||[]);
+  if(st.order&&st.order.length){const by={};secs.forEach(el=>by[el.dataset.sec]=el);const seen=new Set();st.order.forEach(n=>{if(by[n]){app.appendChild(by[n]);seen.add(n);}});secs.forEach(el=>{if(!seen.has(el.dataset.sec))app.appendChild(el);});}
+  app.querySelectorAll("section.sec").forEach(el=>el.style.display=hidden.has(el.dataset.sec)?"none":"");
+  if(key==="brand"){let first=true;app.querySelectorAll("section.sec").forEach(el=>{if(el.style.display==="none"){el.style.borderTop="";el.style.paddingTop="";el.style.paddingBottom="";return;}const img=el.querySelector(".split,.story");el.style.borderTop=first?"0":"var(--line-w) solid var(--lc)";el.style.paddingTop=(first||img)?"0":"var(--sp-l)";el.style.paddingBottom=img?"0":"var(--sp-l)";first=false;});}
+  buildSectionsPanel(key);
+}
+function buildSectionsPanel(key){
+  const app=document.getElementById("app");
+  const secs=[...app.querySelectorAll("section.sec")];
+  const st=SECT[key]||{}, hidden=new Set(st.hidden||[]);
+  document.getElementById("seclist").innerHTML=secs.map((el,i)=>{const n=el.dataset.sec;return `<div class="secrow"><span class="lbl">${n}</span><button onclick="moveSec('${key}','${n}',-1)" ${i===0?"disabled":""}>↑</button><button onclick="moveSec('${key}','${n}',1)" ${i===secs.length-1?"disabled":""}>↓</button><input type="checkbox" ${hidden.has(n)?"":"checked"} onchange="hideSec('${key}','${n}',this.checked)" title="Show/hide"></div>`;}).join("");
+}
+function moveSec(key,name,dir){
+  const app=document.getElementById("app");
+  let order=[...app.querySelectorAll("section.sec")].map(el=>el.dataset.sec);
+  const i=order.indexOf(name), j=i+dir; if(i<0||j<0||j>=order.length)return;
+  order.splice(i,1);order.splice(j,0,name);
+  SECT[key]=Object.assign({},SECT[key],{order}); saveAll(); applySections(key);
+}
+function hideSec(key,name,show){
+  const st=SECT[key]||{}; let h=new Set(st.hidden||[]); if(show)h.delete(name);else h.add(name);
+  SECT[key]=Object.assign({},st,{hidden:[...h]}); saveAll(); applySections(key);
+}
+document.getElementById("gear2").onclick=()=>document.getElementById("sections").classList.toggle("open");
+const FONT_OPTS=[[GROT,"Cooee Grotesk"],[FAV,"Favorit"],["-apple-system,system-ui,sans-serif","System"]];
+const WEIGHT_OPTS=[["400","Book (400)"],["700","Bold (synthetic)"]];
+const SHADES=["#1b1d20","#3a3d42","#55595f","#7a7f85","#c2c6ca"];
+const setVar=(k,v)=>document.documentElement.style.setProperty(k,v);
+const curVar=k=>getComputedStyle(document.documentElement).getPropertyValue(k).trim();
+function applyTog(){document.body.classList.toggle("hide-anno",!TOG.notes);document.getElementById("schemBar").classList.toggle("off",!TOG.bar);document.body.classList.toggle("hide-imglab",!TOG.img);document.body.classList.toggle("footer-light",!!TOG.footerLight);document.body.classList.toggle("footer-logo",!!TOG.footerLogo);document.body.classList.toggle("nav-products",!!TOG.navProducts);}
+
+function collectState(){const vv={};Object.keys(DEF_VARS).forEach(k=>vv[k]=curVar(k));return {vars:vv,type:TYPE,tog:TOG,shape:SHAPE,images:IMAGES,sections:SECT};}
+function saveAll(){try{localStorage.setItem("cooee-v9",JSON.stringify(collectState()));}catch(e){}}
+function applyState(s){
+  if(s.vars)Object.keys(DEF_VARS).forEach(k=>setVar(k,s.vars[k]!=null?s.vars[k]:DEF_VARS[k]));
+  if(s.type)Object.keys(DEF_TYPE).forEach(id=>TYPE[id]=Object.assign({},DEF_TYPE[id],s.type[id]||{}));
+  TOG=Object.assign({},TOGDEF,s.tog||{});
+  SHAPE=s.shape||"pebble";IMAGES=s.images||{};SECT=s.sections||{};applyShape();
+  applyTog();renderType();buildStyleSelect();selectStyle(document.getElementById("styleSel").value||"body");buildImgSelect();selectImg(document.getElementById("imgSel").value||"hero");buildGroups();
+}
+function loadAll(){let s={};try{s=JSON.parse(localStorage.getItem("cooee-v9"))||{};}catch(e){}
+  Object.keys(DEF_VARS).forEach(k=>setVar(k,(s.vars&&s.vars[k]!=null)?s.vars[k]:DEF_VARS[k]));
+  Object.keys(DEF_TYPE).forEach(id=>TYPE[id]=Object.assign({},DEF_TYPE[id],(s.type&&s.type[id])||{}));
+  TOG=Object.assign({},TOGDEF,s.tog||{});
+  SHAPE=s.shape||"pebble";IMAGES=s.images||{};SECT=s.sections||{};
+}
+
+/* type editor */
+function buildStyleSelect(){document.getElementById("styleSel").innerHTML=STYLES.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");}
+function renderStyleCtls(id){
+  const v=TYPE[id];
+  document.getElementById("styleCtls").innerHTML=`
+    <div class="ctl"><label>Font</label><select data-p="font">${FONT_OPTS.map(o=>`<option value='${o[0]}' ${o[0]===v.font?"selected":""}>${o[1]}</option>`).join("")}</select></div>
+    <div class="ctl"><label>Weight</label><select data-p="weight">${WEIGHT_OPTS.map(o=>`<option value='${o[0]}' ${o[0]==v.weight?"selected":""}>${o[1]}</option>`).join("")}</select></div>
+    <div class="ctl"><label>Size<span class="v" id="vp_size">${v.size}px</span></label><input type="range" data-p="size" min="8" max="120" step="0.5" value="${v.size}"></div>
+    <div class="ctl"><label>Leading<span class="v" id="vp_lh">${v.lh}</span></label><input type="range" data-p="lh" min="0.8" max="2" step="0.02" value="${v.lh}"></div>
+    <div class="ctl"><label>Letter-spacing<span class="v" id="vp_ls">${v.ls}em</span></label><input type="range" data-p="ls" min="-0.05" max="0.2" step="0.005" value="${v.ls}"></div>
+    <div class="ctl"><label>Shade</label><div class="swatches">${SHADES.map(s=>`<button data-p="color" data-v="${s}" style="background:${s}" class="${s===v.color?"on":""}"></button>`).join("")}</div></div>`;
+  const box=document.getElementById("styleCtls");
+  const rr=()=>{if(id==="sigkey"||id==="noterole")softRerender();};
+  box.querySelectorAll("select[data-p]").forEach(sel=>sel.onchange=()=>{TYPE[id][sel.dataset.p]=sel.value;renderType();saveAll();rr();});
+  box.querySelectorAll("input[type=range][data-p]").forEach(r=>r.oninput=()=>{TYPE[id][r.dataset.p]=parseFloat(r.value);document.getElementById("vp_"+r.dataset.p).textContent=r.value+(r.dataset.p==="size"?"px":r.dataset.p==="ls"?"em":"");renderType();saveAll();rr();});
+  box.querySelectorAll(".swatches button").forEach(b=>b.onclick=()=>{TYPE[id].color=b.dataset.v;box.querySelectorAll(".swatches button").forEach(x=>x.classList.remove("on"));b.classList.add("on");renderType();saveAll();rr();});
+}
+function selectStyle(id){document.getElementById("styleSel").value=id;renderStyleCtls(id);}
+document.getElementById("styleSel").onchange=e=>renderStyleCtls(e.target.value);
+
+/* image editor */
+function buildImgSelect(){document.getElementById("imgSel").innerHTML=IMG_STYLES.map(s=>`<option value="${s.id}">${s.name}</option>`).join("");}
+function renderImgCtl(id){
+  const im=IMG_STYLES.find(x=>x.id===id),cur=parseFloat(curVar(im.v))||50;
+  document.getElementById("imgCtls").innerHTML=`<div class="ctl"><label>Height<span class="v" id="vimg">${curVar(im.v)}</span></label><input type="range" id="imgRange" min="15" max="100" step="1" value="${cur}"></div>`;
+  document.getElementById("imgRange").oninput=e=>{setVar(im.v,e.target.value+"vh");document.getElementById("vimg").textContent=e.target.value+"vh";saveAll();};
+}
+function selectImg(id){document.getElementById("imgSel").value=id;renderImgCtl(id);}
+document.getElementById("imgSel").onchange=e=>renderImgCtl(e.target.value);
+
+/* var groups */
+function ctlHTML(c){
+  if(c.tog)return `<div class="ctl rw"><label>${c.label}</label><input type="checkbox" data-tog="${c.tog}" ${TOG[c.tog]?"checked":""}></div>`;
+  if(c.swatch)return `<div class="ctl"><label>${c.label}</label><div class="swatches">${c.opts.map(v=>`<button data-vk="${c.swatch}" data-v="${v}" style="background:${v}" class="${v===curVar(c.swatch)?"on":""}"></button>`).join("")}</div></div>`;
+  if(c.varsel)return `<div class="ctl"><label>${c.label}</label><select data-varsel="${c.varsel}">${c.opts.map(o=>`<option value="${o[0]}" ${o[0]===curVar(c.varsel)?"selected":""}>${o[1]}</option>`).join("")}</select></div>`;
+  if(c.choice)return `<div class="ctl"><label>${c.label}</label><select data-choice="${c.choice}">${c.opts.map(o=>`<option value="${o[0]}" ${o[0]===SHAPE?"selected":""}>${o[1]}</option>`).join("")}</select></div>`;
+  return `<div class="ctl"><label>${c.label}<span class="v" id="v_${c.k}">${curVar(c.k)}</span></label><input type="range" data-k="${c.k}" data-u="${c.unit}" min="${c.min}" max="${c.max}" step="${c.step}" value="${parseFloat(curVar(c.k))||c.min}"></div>`;
+}
+function buildGroups(){
+  document.getElementById("groups").innerHTML=VARGROUPS.map(g=>`<div class="grp"><div class="gt">${g.title}</div>${g.controls.map(ctlHTML).join("")}</div>`).join("");
+  const w=document.getElementById("groups");
+  w.querySelectorAll("input[type=range][data-k]").forEach(r=>r.oninput=()=>{const val=r.value+r.dataset.u;setVar(r.dataset.k,val);document.getElementById("v_"+r.dataset.k).textContent=val;saveAll();paintButtons();if(r.dataset.k==="--line-op")computeLC();});
+  w.querySelectorAll("input[type=checkbox][data-tog]").forEach(cb=>cb.onchange=()=>{TOG[cb.dataset.tog]=cb.checked;applyTog();saveAll();if(cb.dataset.tog==="themes")softRerender();});
+  w.querySelectorAll(".swatches button[data-vk]").forEach(b=>b.onclick=()=>{setVar(b.dataset.vk,b.dataset.v);b.parentNode.querySelectorAll("button").forEach(x=>x.classList.remove("on"));b.classList.add("on");saveAll();if(b.dataset.vk==="--line-c")computeLC();});
+  w.querySelectorAll("select[data-varsel]").forEach(sel=>sel.onchange=()=>{setVar(sel.dataset.varsel,sel.value);saveAll();});
+  w.querySelectorAll("select[data-choice]").forEach(sel=>sel.onchange=()=>{SHAPE=sel.value;applyShape();saveAll();});
+}
+
+/* design mode */
+const badge=document.getElementById("dmBadge");
+function matchImg(el){
+  if(!el.closest)return null;
+  if(el.closest(".concept-over"))return null;
+  if(el.closest(".hero"))return IMG_STYLES.find(i=>i.id==="hero");
+  const phEl=el.closest(".ph");if(!phEl)return null;
+  for(const id of IMG_MATCH){const im=IMG_STYLES.find(x=>x.id===id);if(phEl.closest(im.sel))return im;}
+  return IMG_STYLES.find(i=>i.id==="tile");
+}
+function pickTarget(el){const im=matchImg(el);if(im)return{kind:"img",style:im};const s=matchStyle(el);return s?{kind:"type",style:s}:null;}
+function flash(gid){const g=document.getElementById(gid);g.scrollIntoView({block:"nearest"});g.classList.add("flash");setTimeout(()=>g.classList.remove("flash"),700);}
+document.addEventListener("mousemove",e=>{
+  if(!designMode){badge.style.display="none";return;}
+  const t=pickTarget(e.target);
+  if(t){badge.textContent=(t.kind==="img"?"▦ ":"T ")+t.style.name;badge.style.display="block";badge.style.left=Math.min(e.clientX+12,innerWidth-170)+"px";badge.style.top=(e.clientY+14)+"px";}
+  else badge.style.display="none";
+});
+document.addEventListener("click",e=>{
+  if(!designMode)return;
+  if(e.target.closest(".ph-up"))return;
+  if(e.target.closest("#settings")||e.target.closest("#gear"))return;
+  const t=pickTarget(e.target);
+  if(t){e.preventDefault();e.stopPropagation();document.getElementById("settings").classList.add("open");
+    if(t.kind==="type"){selectStyle(t.style.id);flash("typeGroup");}else{selectImg(t.style.id);flash("imgGroup");}}
+},true);
+document.getElementById("dmTog").onchange=e=>{designMode=e.target.checked;document.body.classList.toggle("design",designMode);if(!designMode)badge.style.display="none";};
+
+/* save / load */
+document.getElementById("gear").onclick=()=>document.getElementById("settings").classList.toggle("open");
+document.getElementById("saveJson").onclick=()=>{
+  const blob=new Blob([JSON.stringify(collectState(),null,2)],{type:"application/json"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="cooee-scaffold-settings.json";a.click();URL.revokeObjectURL(a.href);
+};
+document.getElementById("loadBtn").onclick=()=>document.getElementById("loadJson").click();
+document.getElementById("loadJson").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{applyState(JSON.parse(r.result));saveAll();}catch(err){alert("Could not read that JSON.");}};r.readAsText(f);};
+document.getElementById("resetBtn").onclick=()=>{Object.entries(DEF_VARS).forEach(([k,v])=>setVar(k,v));TYPE=JSON.parse(JSON.stringify(DEF_TYPE));TOG=Object.assign({},TOGDEF);SHAPE="pebble";applyShape();try{localStorage.removeItem("cooee-v9");}catch(e){}applyTog();renderType();buildStyleSelect();selectStyle("body");buildImgSelect();selectImg("hero");buildGroups();};
+
+/* close the open fragrance panel on scroll; navbar stays put */
+window.addEventListener("scroll",()=>{if(document.getElementById("mega").classList.contains("open"))closeMega();},{passive:true});
+window.addEventListener("resize",()=>{if(SHAPE==="pebble")paintButtons();},{passive:true});
+
+/* init */
+if(location.search.indexOf("edit")>-1||location.hash.indexOf("edit")>-1)document.body.classList.add("edit-mode");
+loadAll();computeLC();applyTog();applyShape();renderType();buildStyleSelect();selectStyle("body");buildImgSelect();selectImg("hero");buildGroups();fillMega();renderBag();router();
+</script>
+</body>
+</html>

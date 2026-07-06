@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COOEE — Packaging viewer</title>
+<style>
+  @font-face{
+    font-family:'ABC Favorit';
+    src:url('fonts/ABCFavorit-Book-Trial.woff2') format('woff2'),
+        url('fonts/ABCFavorit-Book-Trial.woff') format('woff');
+    font-weight:normal; font-style:normal; font-display:swap;
+  }
+  :root{
+    --purple:#4a1571;
+    --lav:#a1bad8;
+    --ease:cubic-bezier(.22,.61,.36,1);
+
+    /* light theme (Aperitivo) — dark type */
+    --bg:#b0c5d6;
+    --bg2:#a3bacd;
+    --ink:#1a1320;
+    --muted:#6b6577;
+    --line:rgba(26,19,32,.12);
+    --pill:#ffffff;
+    --shadow:rgba(40,20,70,.28);
+    --logo-color:#1a1320;
+    --logo-scale:0.95;          /* logo size factor (smaller on mobile) */
+    --grain:0.12;               /* fixed film-grain intensity */
+    --ov:0px;                   /* faces meet exactly (the inner core fills seams) */
+  }
+  /* Cologne (dark theme) — UI/type in the packaging light blue */
+  body[data-bg="dark"]{
+    --bg:#231c1c;
+    --bg2:#1a1414;
+    --ink:#a1bad8;
+    --muted:rgba(161,186,216,.72);
+    --line:rgba(161,186,216,.4);
+    --pill:rgba(255,255,255,.06);
+    --shadow:rgba(0,0,0,.55);
+    --logo-color:#a1bad8;
+  }
+  /* Sun Skin — solid #d8b0c8 page, type & controls in #702c14 */
+  body[data-product="sun-skin"]{
+    --bg:#d8b0c8; --bg2:#d8b0c8;
+    --ink:#702c14;
+    --muted:rgba(112,44,20,.82);
+    --line:rgba(112,44,20,.5);
+    --pill:transparent;
+    --logo-color:#702c14;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{
+    font-family:'ABC Favorit',"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(120% 120% at 70% 30%, var(--bg) 0%, var(--bg2) 100%);
+    overflow:hidden;
+    transition:background .45s var(--ease), color .3s var(--ease);
+  }
+
+  .app{
+    display:flex;
+    height:100vh;
+    width:100vw;
+  }
+
+  /* film grain over the whole scene (bg + packaging) — monochrome, so it adds
+     texture only, not colour. Tune intensity with --grain. */
+  .grain{
+    position:fixed; inset:0; z-index:60; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%27220%27%20height%3D%27220%27%3E%3Cfilter%20id%3D%27g%27%3E%3CfeTurbulence%20type%3D%27fractalNoise%27%20baseFrequency%3D%270.85%27%20numOctaves%3D%272%27%20stitchTiles%3D%27stitch%27%2F%3E%3CfeColorMatrix%20type%3D%27saturate%27%20values%3D%270%27%2F%3E%3CfeComponentTransfer%3E%3CfeFuncR%20type%3D%27linear%27%20slope%3D%271.5%27%20intercept%3D%27-0.25%27%2F%3E%3CfeFuncG%20type%3D%27linear%27%20slope%3D%271.5%27%20intercept%3D%27-0.25%27%2F%3E%3CfeFuncB%20type%3D%27linear%27%20slope%3D%271.5%27%20intercept%3D%27-0.25%27%2F%3E%3CfeFuncA%20type%3D%27linear%27%20slope%3D%270%27%20intercept%3D%271%27%2F%3E%3C%2FfeComponentTransfer%3E%3C%2Ffilter%3E%3Crect%20width%3D%27220%27%20height%3D%27220%27%20filter%3D%27url%28%23g%29%27%2F%3E%3C%2Fsvg%3E");
+    background-size:150px 150px;
+    mix-blend-mode:overlay;
+    opacity:var(--grain, .08);
+    transition:opacity .55s ease;        /* settles back in after motion stops */
+    animation:grainboil .5s steps(1,end) infinite;   /* shifts each step so it reads as film, not a fixed screen pattern */
+  }
+  body.busy .grain{ opacity:calc(var(--grain, .08) * 0.45); transition:opacity .12s ease; }   /* eases off while moving, settles back (like a post-layer re-rendering) */
+  @keyframes grainboil{
+    0%{background-position:0 0;}        12%{background-position:-37px -23px;}
+    24%{background-position:48px 17px;} 36%{background-position:-23px 41px;}
+    48%{background-position:31px -44px;}60%{background-position:-48px 9px;}
+    72%{background-position:22px 37px;} 84%{background-position:-31px -18px;}
+    100%{background-position:13px -29px;}
+  }
+  @media (prefers-reduced-motion:reduce){ .grain{ animation:none; } }
+
+  /* ---------- Sidebar / selector ---------- */
+  .sidebar{
+    width:320px;
+    flex:0 0 320px;
+    padding:48px 44px;
+    display:flex;
+    flex-direction:column;
+    gap:0;
+    border-right:1px solid var(--line);
+  }
+  .eyebrow{
+    font-size:15px;
+    letter-spacing:.07em;
+    text-transform:uppercase;
+    color:var(--muted);
+    font-weight:700;
+    margin-bottom:auto;
+  }
+  .sub{
+    font-size:11px;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    margin-bottom:auto;
+  }
+  .logos{
+    display:flex;
+    flex-direction:column;
+    gap:42px;
+    margin:auto 0;
+    align-items:flex-start;
+  }
+  .logo-btn{
+    background:none;border:none;padding:0;cursor:pointer;
+    display:block;text-align:left;line-height:0;
+    position:relative;
+    opacity:.32;
+    transition:opacity .3s var(--ease), transform .3s var(--ease);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .logo-btn:hover{opacity:.62;}
+  .logo-btn.active{opacity:1;}
+  .logo-btn svg{ display:block;
+    width:calc(var(--lw) * var(--logo-scale) * 1px);
+    height:calc(var(--lh) * var(--logo-scale) * 1px); }
+  .logo-btn svg path, .logo-btn svg rect, .logo-btn svg polygon{ fill:var(--logo-color,#a1bad8); }
+  .logo-btn .dot{
+    position:absolute;
+    left:-22px;top:50%;
+    width:7px;height:7px;border-radius:50%;
+    background:var(--purple);
+    transform:translateY(-50%) scale(0);
+    transition:transform .3s var(--ease);
+  }
+  body[data-bg="dark"] .logo-btn .dot{background:var(--lav);}
+  .logo-btn.active .dot{transform:translateY(-50%) scale(1);}
+
+  .foot{
+    font-size:11px;color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.07em;line-height:1.6;
+    margin-top:auto;
+  }
+
+  /* ---------- Stage ---------- */
+  .stage-wrap{
+    flex:1;
+    position:relative;
+  }
+  .stage{
+    position:absolute; inset:0;     /* full area — box bleeds behind the controls, not clipped above them */
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    perspective:3900px;
+    perspective-origin:50% 42%;
+    cursor:grab;
+    touch-action:none;
+    user-select:none;
+    overflow:hidden;                /* only clips at the screen edge */
+  }
+  .stage.dragging{cursor:grabbing;}
+
+  .pedestal{
+    position:relative;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+  .boxhover{
+    transform-style:preserve-3d;
+    transition:transform .28s cubic-bezier(.34,.06,.2,1);   /* micro grow on hover */
+    will-change:transform;
+  }
+
+  .box{
+    position:relative;
+    width:var(--w);
+    height:var(--h);
+    transform-style:preserve-3d;
+    will-change:transform;
+    pointer-events:auto;          /* so a drag that starts on the box rotates (vs pan on bg) */
+  }
+  .face{
+    position:absolute;
+    left:50%;top:50%;
+    overflow:hidden;
+    background:var(--panel,#dfe9f2); /* package colour — shows through any transparent art */
+    backface-visibility:hidden;
+  }
+  .face img{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    object-fit:fill;
+    display:block;
+    pointer-events:none;
+    -webkit-user-drag:none;
+    user-select:none;
+  }
+  /* darker inner shell: any hairline seam between faces reads as the box edge */
+  .cface{
+    background:var(--core,#1d1a1c);
+    backface-visibility:visible;
+  }
+  .cface.front  { transform: rotateY(0deg)    translateZ(calc(var(--d)/2 - 1.5px)); }
+  .cface.back   { transform: rotateY(180deg)  translateZ(calc(var(--d)/2 - 1.5px)); }
+  .cface.right  { transform: rotateY(90deg)   translateZ(calc(var(--w)/2 - 1.5px)); }
+  .cface.left   { transform: rotateY(-90deg)  translateZ(calc(var(--w)/2 - 1.5px)); }
+  .cface.top    { transform: rotateX(90deg)   translateZ(calc(var(--h)/2 - 1.5px)); }
+  .cface.bottom { transform: rotateX(-90deg)  translateZ(calc(var(--h)/2 - 1.5px)); }
+  .face .lbl{
+    position:absolute;inset:0;
+    display:flex;align-items:center;justify-content:center;
+    color:rgba(255,255,255,.45);
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    font-weight:700;
+  }
+  /* per-face shade overlay (lighting) */
+  .shade{
+    position:absolute;inset:0;
+    background:#000;
+    opacity:0;
+    pointer-events:none;
+  }
+
+  /* each face: anchored at box centre via left/top:50% + negative margins
+     of half its own size, then rotated and pushed out along local Z.
+     Faces are oversized by --ov on every side so neighbours overlap — no seam
+     can show the background. The lip is the box's own colour, so it's invisible. */
+  .front,.back{ width:calc(var(--w) + var(--ov)*2); height:calc(var(--h) + var(--ov)*2);
+    margin-left:calc((var(--w) + var(--ov)*2) / -2); margin-top:calc((var(--h) + var(--ov)*2) / -2); }
+  .left,.right{ width:calc(var(--d) + var(--ov)*2); height:calc(var(--h) + var(--ov)*2);
+    margin-left:calc((var(--d) + var(--ov)*2) / -2); margin-top:calc((var(--h) + var(--ov)*2) / -2); }
+  .top,.bottom{ width:calc(var(--w) + var(--ov)*2); height:calc(var(--d) + var(--ov)*2);
+    margin-left:calc((var(--w) + var(--ov)*2) / -2); margin-top:calc((var(--d) + var(--ov)*2) / -2); }
+
+  .front  { transform: rotateY(0deg)    translateZ(calc(var(--d) / 2)); }
+  .back   { transform: rotateY(180deg)  translateZ(calc(var(--d) / 2)); }
+  .right  { transform: rotateY(90deg)   translateZ(calc(var(--w) / 2)); }
+  .left   { transform: rotateY(-90deg)  translateZ(calc(var(--w) / 2)); }
+  .top    { transform: rotateX(90deg)   translateZ(calc(var(--h) / 2)); }
+  .bottom { transform: rotateX(-90deg)  translateZ(calc(var(--h) / 2)); }
+
+  /* ---------- controls overlay the bottom of the stage ---------- */
+  .controls{
+    position:absolute;
+    left:0; right:0; bottom:0;
+    z-index:10;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:20px;
+    padding:0 0 32px;
+    pointer-events:none;           /* only the buttons capture clicks (set below) */
+  }
+  .controls > *{ pointer-events:auto; }
+  #bgimage{
+    position:fixed; inset:0; z-index:-1;
+    background-size:cover; background-position:center;
+    display:none;
+  }
+  .seg{
+    display:none;                 /* bg is set per product; manual toggle hidden */
+    background:var(--pill);
+    border:1px solid var(--line);
+    border-radius:999px;
+    padding:4px;
+    gap:2px;
+  }
+  .seg button{
+    appearance:none;border:none;background:none;cursor:pointer;
+    font:inherit;font-size:12px;font-weight:600;letter-spacing:.04em;
+    color:var(--muted);
+    padding:7px 18px;border-radius:999px;
+    transition:color .25s var(--ease), background .25s var(--ease);
+  }
+  .seg button.active{
+    color:var(--ink);
+    background:rgba(128,90,180,.16);
+  }
+  body[data-bg="dark"] .seg button.active{background:rgba(161,186,216,.18);}
+
+  /* outline-only buttons (no fill), all-caps with 7% tracking — for every product */
+  .reset, .viewtoggle{
+    appearance:none; background:transparent; border:1px solid var(--line);
+    color:var(--ink); cursor:pointer;
+    font:inherit; font-size:11px; font-weight:normal;
+    text-transform:uppercase; letter-spacing:.07em;
+    padding:9px 16px; border-radius:999px;
+    transition:color .25s, border-color .25s;
+  }
+  .reset:hover, .viewtoggle:hover{ border-color:var(--ink); }
+
+  /* zoom slider */
+  .zoomctl{display:inline-flex;align-items:center;gap:10px;
+    font-size:11px;font-weight:normal;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);}
+  .zoomctl .pval{min-width:38px;text-transform:none;letter-spacing:.02em;color:var(--ink);
+    font-variant-numeric:tabular-nums;}
+  .zoomctl input[type=range]{
+    -webkit-appearance:none;appearance:none;width:140px;height:3px;border-radius:999px;
+    background:var(--line);outline:none;cursor:pointer;}
+  .zoomctl input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:15px;height:15px;border-radius:50%;
+    background:var(--ink);border:2px solid var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.3);}
+  .zoomctl input[type=range]::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;background:var(--ink);
+    border:2px solid var(--bg);box-shadow:0 1px 3px rgba(0,0,0,.3);}
+
+  /* ---------- flip-top lid + interior ---------- */
+  .interior, .lid{ display:none; }
+  .box.foldable .interior, .box.foldable .lid{ display:block; }
+  .box.foldable .top:not(.cface){ display:none; } /* lid replaces the visible top face… */
+  .box.foldable.open .cface.top{ display:none; }  /* …but the inner core backs the closed seam (clean like the bottom); hidden only when open */
+
+  .interior{
+    position:absolute; left:0; top:0;
+    width:var(--w); height:var(--h);
+    transform-style:preserve-3d;
+    pointer-events:none;
+  }
+  .insert, .iwall{ position:absolute; left:50%; top:50%; background:var(--interior,#372b2a); }
+  .insert{
+    width:calc(var(--w) - 2 * var(--t));
+    height:calc(var(--d) - 2 * var(--t));
+    margin-left:calc((var(--w) - 2 * var(--t)) / -2);
+    margin-top:calc((var(--d) - 2 * var(--t)) / -2);
+    transform: rotateX(90deg) translateZ(calc(var(--h)/2 - var(--step)));
+  }
+  .iback, .ifront{
+    width:calc(var(--w) - 2 * var(--t)); height:var(--h);
+    margin-left:calc((var(--w) - 2 * var(--t)) / -2); margin-top:calc(var(--h) / -2);
+  }
+  .ileft, .iright{
+    width:calc(var(--d) - 2 * var(--t)); height:var(--h);
+    margin-left:calc((var(--d) - 2 * var(--t)) / -2); margin-top:calc(var(--h) / -2);
+  }
+  .iback  { transform: translateZ(calc(var(--d)/-2 + var(--t))); }
+  .ifront { transform: translateZ(calc(var(--d)/2 - var(--t))) rotateY(180deg); }
+  .ileft  { transform: rotateY(90deg)  translateZ(calc(var(--w)/-2 + var(--t))); }
+  .iright { transform: rotateY(-90deg) translateZ(calc(var(--w)/-2 + var(--t))); }
+  /* rim caps: close the open wall-top thickness — only while the lid is open
+     (when closed the lid covers the top, so they'd otherwise poke out as a coloured line) */
+  .rim{ position:absolute; left:50%; top:50%; background:var(--interior,#372b2a); display:none; }
+  .box.open .rim{ display:block; }
+  .rim-back, .rim-front{ width:var(--w); height:var(--t);
+    margin-left:calc(var(--w) / -2); margin-top:calc(var(--t) / -2); }
+  .rim-left, .rim-right{ width:var(--t); height:var(--d);
+    margin-left:calc(var(--t) / -2); margin-top:calc(var(--d) / -2); }
+  .rim-back  { transform: translate3d(0, calc(var(--h)/-2), calc(var(--d)/-2 + var(--t)/2)) rotateX(90deg); }
+  .rim-front { transform: translate3d(0, calc(var(--h)/-2), calc(var(--d)/2 - var(--t)/2)) rotateX(90deg); }
+  .rim-left  { transform: translate3d(calc(var(--w)/-2 + var(--t)/2), calc(var(--h)/-2), 0) rotateX(90deg); }
+  .rim-right { transform: translate3d(calc(var(--w)/2 - var(--t)/2), calc(var(--h)/-2), 0) rotateX(90deg); }
+
+  .lid{
+    position:absolute; left:0; top:0;
+    width:var(--w); height:var(--h);
+    transform-style:preserve-3d;
+    transform-origin:50% 0 calc(var(--d) / -2);   /* back-top edge */
+    transform: rotateX(var(--open, 0deg));
+    transition: transform .6s cubic-bezier(.34,.06,.2,1);
+    pointer-events:none;
+  }
+  .box.open .lid{ --open: 125deg; }
+
+  .panel{ position:absolute; left:50%; top:50%; transform-style:preserve-3d; }
+  .lidtop{
+    width:var(--w); height:var(--d);
+    margin-left:calc(var(--w) / -2); margin-top:calc(var(--d) / -2);
+    transform: rotateX(90deg) translateZ(calc(var(--h)/2));
+  }
+  /* flap sits a hair inside the front wall — hidden when closed, but flush with the
+     lid's front edge so the fold lines up when open */
+  .lidlip{
+    width:var(--w); height:var(--lf);
+    margin-left:calc(var(--w) / -2); margin-top:calc(var(--lf) / -2);
+    transform: translate3d(0, calc(var(--lf)/2 - var(--h)/2), calc(var(--d)/2 - 1px));
+  }
+  .panel .out, .panel .in{
+    position:absolute; inset:0; overflow:hidden;
+    backface-visibility:hidden;
+    background:transparent;          /* lid art keeps its own transparency (e.g. rounded flap) */
+  }
+  .panel .in{ transform: rotateY(180deg); }
+  .panel .out img, .panel .in img{ width:100%; height:100%; object-fit:fill; display:block; }
+  /* lid art is two-sided: outer reads when closed, inner reads when open */
+  .lidlip .in img{ transform: rotate(180deg); }    /* inner-flap pill upright when open */
+  .lidlip .out img{ transform: rotate(180deg); }   /* outer-flap is drawn upside-down */
+  .lidtop .in img{ transform: rotate(180deg); }    /* inner-top reads upright when open */
+  .lidtop .in{ background:var(--interior,#372b2a); }   /* opaque underside so the lid never vanishes */
+
+  /* ---------- view toggle + flat dieline ---------- */
+  .viewtoggle{ position:absolute; top:22px; right:26px; z-index:20; }   /* appearance inherited from .reset,.viewtoggle */
+
+  .flat{
+    display:none;
+    position:absolute; inset:0;
+    pointer-events:none;
+    cursor:grab;
+    user-select:none;
+  }
+  body.flatmode .flat{ pointer-events:auto; }   /* drag to pan the dieline */
+  .flat.dragging{ cursor:grabbing; }
+  .flat .net{ position:absolute; left:50%; top:50%; transform-origin:center center; }
+  .flat .net img{ display:block; pointer-events:none; -webkit-user-drag:none; user-drag:none; }
+  body.flatmode .stage{ visibility:hidden; }   /* keep its flex space so controls stay at bottom */
+  body.flatmode .hint{ display:none; }
+  body.flatmode .flat{ display:block; }
+  body.flatmode #reset, body.flatmode #openbtn{ display:none; }   /* keep bg toggle + zoom */
+
+  .hint{
+    position:absolute;
+    top:34px;left:50%;transform:translateX(-50%);
+    font-size:11px;letter-spacing:.07em;text-transform:uppercase;
+    color:var(--muted);
+    opacity:.0;
+    transition:opacity .6s var(--ease);
+    pointer-events:none;
+  }
+  .hint.show{opacity:.8;}
+
+  @media (max-width:720px){
+    :root{ --logo-scale:0.5; }                 /* smaller logos on mobile */
+    .app{flex-direction:column;}
+    .sidebar{width:100%;flex:0 0 auto;flex-direction:row;align-items:flex-start;
+      border-right:none;border-bottom:1px solid var(--line);padding:16px 20px;gap:20px;}
+    .logos{flex-direction:row;gap:20px;margin:0;align-items:flex-start;}  /* aligned by top edge */
+    .eyebrow,.sub,.foot{display:none;}
+    .logo-btn .dot{display:none;}
+  }
+  /* --- embed mode (used when the viewer is iframed into the site) --- */
+  body.embed .sidebar{display:none!important}
+  body.embed .app{display:block!important;height:100%}
+  body.embed .stage-wrap{width:100%!important;height:100%!important}
+  body.embed #viewtoggle{display:none!important}
+  body.embed #bgseg{display:none!important}
+  body.embed #reset{display:none!important}
+  body.embed .zoomctl{display:none!important}
+  body.embed #openbtn{display:inline-block;position:fixed;top:20px;right:20px;z-index:30;margin:0}
+  body.embed::after{content:"";position:fixed;inset:0;background:rgba(15,10,20,.10);pointer-events:none;z-index:-1}
+</style>
+</head>
+<body data-bg="light">
+  <div id="bgimage"></div>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="eyebrow">Cooee</div>
+
+      <nav class="logos" id="logos"></nav>
+
+      <div class="foot">Australian fragrances. Formulated and hand-blended in small batches.</div>
+    </aside>
+
+    <div class="stage-wrap">
+      <button class="viewtoggle" id="viewtoggle">Flat view</button>
+      <div class="flat" id="flat"></div>
+      <div class="hint" id="hint">Drag to rotate</div>
+      <div class="stage" id="stage">
+        <div class="pedestal">
+         <div class="boxhover" id="boxhover">
+          <div class="box" id="box">
+            <div class="face cface front"></div>
+            <div class="face cface back"></div>
+            <div class="face cface right"></div>
+            <div class="face cface left"></div>
+            <div class="face cface top"></div>
+            <div class="face cface bottom"></div>
+            <div class="face front"><span class="lbl">Front</span><img alt=""><div class="shade"></div></div>
+            <div class="face back"><span class="lbl">Back</span><img alt=""><div class="shade"></div></div>
+            <div class="face right"><span class="lbl">Right</span><img alt=""><div class="shade"></div></div>
+            <div class="face left"><span class="lbl">Left</span><img alt=""><div class="shade"></div></div>
+            <div class="face top"><span class="lbl">Top</span><img alt=""><div class="shade"></div></div>
+            <div class="face bottom"><span class="lbl">Bottom</span><img alt=""><div class="shade"></div></div>
+
+            <!-- recessed interior (shown only for foldable products) -->
+            <div class="interior">
+              <div class="insert"><div class="shade"></div></div>
+              <div class="iwall iback"><div class="shade"></div></div>
+              <div class="iwall ileft"><div class="shade"></div></div>
+              <div class="iwall iright"><div class="shade"></div></div>
+              <div class="iwall ifront"><div class="shade"></div></div>
+              <div class="rim rim-back"><div class="shade"></div></div>
+              <div class="rim rim-front"><div class="shade"></div></div>
+              <div class="rim rim-left"><div class="shade"></div></div>
+              <div class="rim rim-right"><div class="shade"></div></div>
+            </div>
+
+            <!-- flip-top lid: top panel + front lip, hinged at the back-top edge -->
+            <div class="lid" id="lid">
+              <div class="panel lidtop">
+                <div class="out"><img alt="" id="lidTopImg"><div class="shade"></div></div>
+                <div class="in"><img alt="" id="lidTopInImg"><div class="shade"></div></div>
+              </div>
+              <div class="panel lidlip">
+                <div class="out"><img alt="" id="lidLipImg"><div class="shade"></div></div>
+                <div class="in"><img alt="" id="lidLipInImg"><div class="shade"></div></div>
+              </div>
+            </div>
+          </div>
+         </div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div class="seg" id="bgseg">
+          <button data-bg="light" class="active">Light</button>
+          <button data-bg="dark">Dark</button>
+        </div>
+        <button class="reset" id="reset">Reset view</button>
+        <button class="reset" id="openbtn" hidden>Open lid</button>
+
+        <div class="zoomctl">
+          <span class="cap">Zoom</span>
+          <input type="range" id="zoom" min="1" max="3" step="0.05" value="1.2">
+          <span class="pval" id="zval">1.0×</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="grain"></div>
+
+<script>
+/* ----------------------------------------------------------
+   PRODUCT CONFIG  — add/adjust products here.
+   ratios are face-image aspect ratios relative to height:
+     w = box width / box height   (from front image  w/h)
+     d = box depth / box height   (from side  image  w/h)
+   logoW = the logo SVG's intrinsic viewBox width (used so all
+           three logos render at one uniform scale).
+---------------------------------------------------------- */
+const LOGO_SCALE = 0.95;                 // px per viewBox unit (uniform across logos)
+const ASPECT = { w: 463/1516, d: 464/1516 };   // Aperitivo box proportions
+
+// Convention: drop six files named front/back/left/right/top/bottom.<ext> into the folder.
+//   folder   - product folder (spaces fine)
+//   ext      - 'jpg' | 'png' | 'svg'  (svg = crisp at any zoom)
+//   panel    - the package's own colour: used for seams + any transparent areas (so gaps match)
+//   interior - inside colour when the box is open
+//   ratios   - box width/height and depth/height, from the face-image aspect ratios
+//   fold     - lid: lip height (frac of H), insert step (frac of H), wall thickness (px)
+//   prefix   - optional filename prefix; omit unless files are named e.g. cologne-front.svg
+const SQ = { w:149.76/489.04, d:149.76/489.04 };   // square cross-section (all three boxes)
+const FOLD = { lip:45.82/489.04, step:0.028, wall:6 };
+const PRODUCTS = [
+  { id:'cologne',   logo:'Logos/cologne-logo.svg',   logoW:203.03, logoH:60.1,
+    folder:'Cologne',   ext:'svg', panel:'#dfe9f2', interior:'#372b2a',
+    bg:'dark', ratios:SQ, fold:FOLD },
+  { id:'aperitivo', logo:'Logos/aperitivo-logo.svg', logoW:207.57, logoH:28.28,
+    folder:'Aperitivo', ext:'svg', panel:'#510e74', interior:'#98bada',
+    bg:'light', ratios:SQ, fold:FOLD },
+  { id:'sun-skin',  logo:'Logos/sun-skin-logo.svg',  logoW:188.6, logoH:28.29,
+    folder:'Sun Skin',  ext:'svg', panel:'#fa4803', interior:'#ffc9ef',
+    bg:'light', ratios:SQ, fold:FOLD },
+];
+
+const FACES = ['front','back','left','right','top','bottom'];
+
+const LOGOS_SVG = {
+  'aperitivo': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 207.57 28.28">  <g>    <g>      <rect x="107.27" y=".64" width="8.07" height="26.98"/>      <path d="M46.18.63h-14.91s0,26.98,0,26.98h8.07v-8.27s6.84,0,6.84,0c5.17,0,9.36-4.19,9.36-9.36h0c0-5.17-4.19-9.36-9.36-9.36ZM44.95,12.5h-5.61s0-5.03,0-5.03h5.61c1.39,0,2.52,1.13,2.52,2.52s-1.13,2.52-2.52,2.52Z"/>      <path d="M19.58.64h-7.95s-.04,0-.04,0l.02.04L0,27.64h7.95s1.96-4.55,1.96-4.55h11.35s1.96,4.55,1.96,4.55h8.05S19.64.64,19.64.64h-.06ZM12.86,16.26l2.73-6.34,2.73,6.34h-5.46Z"/>      <path d="M56.68,27.64h21.06s0-6.57,0-6.57h-12.67c-.92,0-1.66-.74-1.66-1.66v-.06c0-.92.74-1.66,1.66-1.66h10.77v-6.89h-10.77c-.92,0-1.66-.74-1.66-1.66s.74-1.66,1.66-1.66h12.67V.64s-21.06,0-21.06,0v27Z"/>      <polygon points="174.12 .64 167.74 15.46 161.36 .64 152.61 .64 164.24 27.64 170.86 27.64 182.49 .64 174.12 .64"/>      <path d="M105.1,9.78h0c0-5.05-4.1-9.15-9.15-9.15h-15.42s0,26.98,0,26.98h8.07v-10.5s7.73,10.52,7.73,10.52h8.99s-6.69-9.11-6.69-9.11c3.74-1.15,6.46-4.63,6.46-8.75ZM97.03,9.78c0,1.27-1.03,2.31-2.31,2.31h-6.12s0-4.62,0-4.62h6.12c1.27,0,2.31,1.03,2.31,2.31h0Z"/>      <path d="M193.48,0c-8.82,0-14.09,6.33-14.09,14.14s4.98,14.14,14.09,14.14,14.09-6.33,14.09-14.14S202.21,0,193.48,0ZM193.48,20.37c-4.01,0-6.21-2.79-6.21-6.23s2.32-6.23,6.21-6.23,6.21,2.79,6.21,6.23-2.36,6.23-6.21,6.23Z"/>      <rect x="143.41" y=".64" width="8.07" height="26.98"/>      <polygon points="116.67 8.46 125.39 8.46 125.39 27.62 133.46 27.62 133.46 8.46 142.18 8.46 142.18 .64 116.67 .64 116.67 8.46"/>    </g>  </g></svg>`,
+  'cologne': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 203.03 60.1">  <g>    <g>      <path d="M89.04,17.95h10.93v-6.99h-10.93c-.93,0-1.69-.75-1.69-1.69h0c0-.93.75-1.69,1.69-1.69h12.86V.65h-21.37v27.4h21.37v-6.66h-12.86c-.93,0-1.69-.75-1.69-1.69v-.06c0-.93.75-1.69,1.69-1.69ZM49.46,14.35c0,7.93-5.44,14.35-14.3,14.35s-14.3-6.42-14.3-14.35S26.21,0,35.16,0s14.3,6.42,14.3,14.35ZM35.16,8.03c-3.94,0-6.3,2.83-6.3,6.32s2.23,6.32,6.3,6.32,6.3-2.83,6.3-6.32-2.4-6.32-6.3-6.32ZM64.94,0c-8.95,0-14.3,6.42-14.3,14.35s5.05,14.35,14.3,14.35,14.3-6.42,14.3-14.35S73.8,0,64.94,0ZM71.24,14.35c0,3.49-2.4,6.32-6.3,6.32s-6.3-2.83-6.3-6.32,2.36-6.32,6.3-6.32,6.3,2.83,6.3,6.32ZM15.11,7.88c2.33,0,3.38.14,5.66.57V.95c-1.74-.45-3.74-.68-6.42-.68h0C5.91.27,0,6.58,0,14.35s5.86,14.08,14.35,14.08h0c2.43,0,4.24-.23,6.42-.68v-7.5c-2.25.45-3.3.57-5.66.57-4.33,0-7.22-2.9-7.22-6.47s2.57-6.47,7.22-6.47ZM112.31,17.95h10.93v-6.99h-10.93c-.93,0-1.69-.75-1.69-1.69h0c0-.93.75-1.69,1.69-1.69h12.86V.65h-21.37v27.4h21.37v-6.66h-12.86c-.93,0-1.69-.75-1.69-1.69v-.06c0-.93.75-1.69,1.69-1.69Z"/>      <g>        <path d="M72.34,32.04v27.41h21.81v-7.38h-11.78c-.93,0-1.69-.76-1.69-1.69v-18.34s-8.35,0-8.35,0Z"/>        <path d="M70.49,45.75c0,7.93-5.44,14.35-14.31,14.35s-14.31-6.43-14.31-14.35,5.35-14.35,14.31-14.35,14.31,6.43,14.31,14.35ZM56.19,39.43c-3.94,0-6.3,2.83-6.3,6.32s2.23,6.32,6.3,6.32,6.3-2.83,6.3-6.32-2.4-6.32-6.3-6.32Z"/>        <path d="M107.79,31.39c-8.95,0-14.31,6.43-14.31,14.35s5.06,14.35,14.31,14.35,14.31-6.43,14.31-14.35-5.44-14.35-14.31-14.35ZM114.09,45.75c0,3.49-2.4,6.32-6.3,6.32s-6.3-2.83-6.3-6.32,2.36-6.32,6.3-6.32,6.3,2.83,6.3,6.32Z"/>        <path d="M36.13,39.28c2.33,0,3.38.14,5.67.57v-7.51c-1.74-.45-3.74-.68-6.42-.68h0c-8.44,0-14.35,6.31-14.35,14.08s5.86,14.08,14.35,14.08h0c2.43,0,4.24-.23,6.42-.68v-7.5c-2.25.45-3.31.57-5.67.57-4.33,0-7.22-2.9-7.22-6.47,0-3.57,2.57-6.47,7.22-6.47Z"/>        <path d="M190.17,49.35h10.93v-6.99h-10.93c-.93,0-1.69-.76-1.69-1.69h0c0-.93.76-1.69,1.69-1.69h12.86v-6.94h-21.37v27.41h21.37v-6.66h-12.86c-.93,0-1.69-.76-1.69-1.69v-.06c0-.93.76-1.69,1.69-1.69Z"/>        <path d="M170.41,45.79l-13.58-13.61h-5.52v27.28h8.16v-13.61l13.58,13.61h5.52v-27.28h-8.16v13.61Z"/>        <path d="M148.59,57.88v-15.54h-12.51v6.53h5.09c.9,0,1.63.73,1.63,1.63h0c0,.82-.61,1.52-1.43,1.62-.79.1-1.76.18-2.96.18-5.39,0-7.22-2.9-7.22-6.47s2.4-6.47,8.19-6.47c2.76,0,5.51.32,8.08.98v-7.51c-2.57-.68-5.61-1.08-8.83-1.08h0c-9.62,0-15.32,6.31-15.32,14.08s5.54,14.08,14.13,14.08h1.04c3.23,0,7.08-.76,10.11-2.03Z"/>      </g>    </g>  </g></svg>`,
+  'sun-skin': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 188.6 28.29">  <g>    <g>      <path d="M54.51.78h-8.04v13.8c0,4.67-3.07,5.65-5.65,5.65-2.11,0-5.65-.73-5.65-5.65V.78h-8.04v13.8c0,8.07,5.63,13.7,13.7,13.7s13.7-5.51,13.7-13.7V.78h-.02Z"/>      <path d="M158.35.78h-8.04v26.89h8.04V.78Z"/>      <path d="M76.51,14.77L61.98.78h-5.45v26.89h8.04v-13.99l14.54,13.99h5.45V.78h-8.04v13.99Z"/>      <path d="M180.56.78v13.99l-14.54-13.99h-5.44v26.89h8.04v-13.99l14.54,13.99h5.44V.78h-8.04Z"/>      <path d="M140.32.78l-7.84,8.16c-.65.68-1.79.22-1.79-.72V.78h-8.04v26.89h8.04v-7.57c0-.94,1.15-1.4,1.79-.71l7.83,8.29h9.47l-12.81-13.56,12.81-13.34h-9.47Z"/>      <path d="M109.91,17.61c2.01.19,3.06.6,3.06,1.68,0,1.27-1.64,1.94-5.63,1.94-4.52,0-8.7-1.57-12.17-3.34v7.3c3.47,1.88,7.25,3.1,12.35,3.1,9.78,0,12.87-4.22,12.87-9.01,0-4.35-3.19-7.55-9.7-8.11-1.58-.14-3.92-.32-5.74-.48-2.01-.19-3.06-.6-3.06-1.68,0-1.27,1.64-1.94,5.63-1.94s7.95,1.01,11.55,2.28V2.14c-3.41-1.26-7.55-2.14-11.73-2.14-9.1,0-12.87,4.3-12.87,9.01,0,4.35,3.19,7.55,9.7,8.11,2.28.2,3.87.33,5.74.48Z"/>      <path d="M15.44,17.61c2.01.19,3.06.6,3.06,1.68,0,1.27-1.64,1.94-5.63,1.94-4.52,0-8.7-1.57-12.17-3.34v7.3c3.47,1.88,7.25,3.1,12.35,3.1,9.78,0,12.87-4.22,12.87-9.01,0-4.35-3.19-7.55-9.7-8.11-1.58-.14-3.92-.32-5.74-.48-2.01-.19-3.06-.6-3.06-1.68,0-1.27,1.64-1.94,5.63-1.94s7.95,1.01,11.55,2.28V2.14c-3.41-1.26-7.55-2.14-11.73-2.14C3.77,0,0,4.3,0,9.01c0,4.35,3.19,7.55,9.7,8.11,2.28.2,3.87.33,5.74.48Z"/>    </g>  </g></svg>`
+};
+
+/* ---- build the logo selector ---- */
+const logosEl = document.getElementById('logos');
+PRODUCTS.forEach((p,i)=>{
+  const b = document.createElement('button');
+  b.className = 'logo-btn' + (i===0?' active':'');
+  b.dataset.idx = i;
+  // inline SVG so it recolours via CSS fill (works from file://, unlike mask-image)
+  b.innerHTML = LOGOS_SVG[p.id];
+  const svg = b.querySelector('svg');
+  svg.style.setProperty('--lw', p.logoW);   // size comes from CSS: --lw * --logo-scale
+  svg.style.setProperty('--lh', p.logoH);   // (so mobile can shrink them via a media query)
+  b.addEventListener('click',()=>selectProduct(i));
+  logosEl.appendChild(b);
+});
+
+/* ---- box / faces ---- */
+const box = document.getElementById('box');
+const stage = document.getElementById('stage');
+const openbtn = document.getElementById('openbtn');
+const bgimage = document.getElementById('bgimage');
+const boxhover = document.getElementById('boxhover');
+// pointer within the box's (inflated) bounding rect — used for grab + hover hot area
+function nearBox(cx, cy, pad){
+  const r = box.getBoundingClientRect();
+  return cx > r.left-pad && cx < r.right+pad && cy > r.top-pad && cy < r.bottom+pad;
+}
+const lidImgs = {
+  topOut: document.getElementById('lidTopImg'),
+  topIn:  document.getElementById('lidTopInImg'),
+  lipOut: document.getElementById('lidLipImg'),
+  lipIn:  document.getElementById('lidLipInImg'),
+};
+const faceEls = {};
+FACES.forEach(f=> faceEls[f] = box.querySelector('.'+f+':not(.cface)'));
+const shadeEls = FACES.map(f=> faceEls[f].querySelector('.shade'));
+// interior + lid surfaces also get lit (base normals; lid normals also swing with the hinge)
+const qs = s => box.querySelector(s);
+const INT_SHADES = [
+  {el:qs('.insert .shade'), n:[0,-1,0]}, {el:qs('.iback .shade'), n:[0,0,1]},
+  {el:qs('.ifront .shade'), n:[0,0,-1]}, {el:qs('.ileft .shade'), n:[1,0,0]},
+  {el:qs('.iright .shade'), n:[-1,0,0]},
+  {el:qs('.rim-back .shade'), n:[0,-1,0]}, {el:qs('.rim-front .shade'), n:[0,-1,0]},
+  {el:qs('.rim-left .shade'), n:[0,-1,0]}, {el:qs('.rim-right .shade'), n:[0,-1,0]},
+];
+const LID_SHADES = [
+  {el:qs('.lidtop .out .shade'), n:[0,-1,0]}, {el:qs('.lidtop .in .shade'), n:[0,1,0]},
+  {el:qs('.lidlip .out .shade'), n:[0,0,1]},  {el:qs('.lidlip .in .shade'), n:[0,0,-1]},
+];
+
+let current = 0;
+
+// set an <img> src, hiding it (reveal the colour behind) if the file is absent
+function setImg(img, url){
+  img.style.display = '';
+  img.onerror = ()=>{ img.style.display='none'; };
+  img.src = encodeURI(url);
+}
+
+function sizeBox(){
+  const p = PRODUCTS[current];
+  const z = parseFloat(zoomInput.value) || 1;       // zoom grows the actual box size
+  const h = Math.max(320, Math.min(window.innerHeight*0.60, 500)) * z;   // so SVGs re-render crisp
+  const css = document.documentElement.style;
+  css.setProperty('--h', h+'px');
+  css.setProperty('--w', (h*p.ratios.w)+'px');
+  css.setProperty('--d', (h*p.ratios.d)+'px');
+  if(p.fold){
+    css.setProperty('--lf',   (h*p.fold.lip)+'px');
+    css.setProperty('--step', (h*p.fold.step)+'px');
+    css.setProperty('--t',    ((p.fold.wall||6)*z)+'px');
+  }
+}
+
+function selectProduct(i){
+  current = i;
+  const p = PRODUCTS[i];
+  const fname = n => p.prefix ? `${p.prefix}-${n}` : n;
+  const path  = n => `${p.folder}/${fname(n)}.${p.ext || 'jpg'}`;
+
+  FACES.forEach(f=> setImg(faceEls[f].querySelector('img'), path(f)));
+  document.documentElement.style.setProperty('--panel', p.panel || '#dfe9f2');
+  document.documentElement.style.setProperty('--core',  p.panel || '#dfe9f2');  // seams match package → no hairlines
+  document.documentElement.style.setProperty('--interior', p.interior || '#372b2a');
+
+  // per-product canvas background + product hook (for product-specific styling)
+  document.body.dataset.product = p.id;
+  document.body.dataset.bg = (p.bg === 'dark') ? 'dark' : 'light';
+  if(p.bgImage){
+    bgimage.style.backgroundImage = `url("${encodeURI(p.bgImage)}")`;
+    bgimage.style.display = 'block';
+  } else {
+    bgimage.style.display = 'none';
+  }
+
+  // flip-top lid — always reset to the main (closed, 1.2×, hero) view on switch
+  const foldable = !!p.fold;
+  box.classList.toggle('foldable', foldable);
+  box.classList.remove('open');
+  openbtn.hidden = !foldable;
+  openbtn.textContent = 'Open lid';
+  focusMode = false;
+  stage.style.perspective = HERO_PERSP;
+  zoomInput.value = '1.2';
+  rx = -16; ry = -32;
+  if(foldable){
+    setImg(lidImgs.topOut, path('top'));         // lid outer top   (visible when closed)
+    setImg(lidImgs.topIn,  path('inner-top'));   // lid underside    (visible when open)
+    setImg(lidImgs.lipOut, path('outer-flap'));  // flap outer side  (faces the wall)
+    setImg(lidImgs.lipIn,  path('inner-flap'));  // flap reverse art (visible when open)
+  }
+
+  document.querySelectorAll('.logo-btn').forEach((b,bi)=>
+    b.classList.toggle('active', bi===i));
+  panX=0; panY=0; applyPan();           // fresh, centred view per product
+  sizeBox();
+  if(typeof render === 'function') render();
+  if(document.body.classList.contains('flatmode')) refreshFlat();
+  switchAnim();                         // ease the new product in
+}
+
+// micro-animation when switching product: gently rotate into place.
+// (No opacity/scale fade — opacity<1 flattens preserve-3d and drops the perspective,
+//  which made the box flash a parallel view before snapping in.)
+let switchRAF = null;
+function switchAnim(){
+  if(switchRAF) cancelAnimationFrame(switchRAF);
+  cancelInertia();
+  const trx = rx, trY = ry;               // resting angle just set by selectProduct
+  const frx = trx + 4, frY = trY - 15;    // start a touch rotated, ease into place
+  const t0 = performance.now(), dur = 520;
+  (function anim(now){
+    const k = Math.min(1, (now - t0)/dur), e = 1 - Math.pow(1 - k, 3);
+    rx = frx + (trx - frx) * e;
+    ry = frY + (trY - frY) * e;
+    render();
+    switchRAF = (k < 1) ? requestAnimationFrame(anim) : null;
+  })(t0);
+}
+
+openbtn.addEventListener('click', ()=>{
+  const open = box.classList.toggle('open');
+  openbtn.textContent = open ? 'Close lid' : 'Open lid';
+  if(open) enterFocus(); else exitFocus();   // focus on the opened lid / back to main
+});
+
+/* ---- flat dieline net ---- */
+const flatEl = document.getElementById('flat');
+const viewtoggle = document.getElementById('viewtoggle');
+const flatNet = document.createElement('div');
+flatNet.className = 'net';
+flatEl.appendChild(flatNet);
+let flatUnits = null;
+
+function buildFlat(p){
+  const fname = n => p.prefix ? `${p.prefix}-${n}` : n;
+  const url   = n => encodeURI(`${p.folder}/${fname(n)}.${p.ext || 'jpg'}`);
+  // net units (px in the unscaled net): wall height = 1000
+  const H = 1000, W = H*p.ratios.w, D = H*p.ratios.d;
+  const lip   = H * ((p.fold && p.fold.lip) || 0.094);   // top-fold height
+  const glueW = H * 0.0936;    // left-technical-flap width (45.79/489.57)
+  const dustH = H * 0.1427;    // top-technical-flap height (69.8/489.04)
+  const hasFlaps = !!p.fold;
+
+  // wall band, left→right: LEFT FRONT RIGHT BACK
+  const xL = 0, xF = D, xR = D + W, xB = D + W + D;
+  const ov = 10;   // overlap into the panel so flaps meet with no gap
+  const items = [];
+  const add = (href,x,y,w,h,tf='')=> items.push({href,x,y,w,h,tf});
+  // sx/sy mirror the flap so all four are symmetric (origin = flap centre)
+  const dust = (x,w,y,sx,sy)=>{ const fw=w*0.93; add(url('top-techical-flap'), x+(w-fw)/2, y, fw, dustH, `scale(${sx},${sy})`); };
+
+  if(hasFlaps){
+    // dust flaps on the side panels (left/right), mirrored top/bottom & left/right
+    dust(xL, D, -dustH+ov, 1, 1);   dust(xR, D, -dustH+ov, -1, 1);    // top-left, top-right
+    dust(xL, D, H-ov,      1,-1);   dust(xR, D, H-ov,      -1,-1);    // bottom-left, bottom-right
+    add(url('left-techical-flap'), xL-glueW, 0, glueW, H);            // glue flap
+  }
+  add(url('left'),  xL, 0, D, H);
+  add(url('front'), xF, 0, W, H);
+  add(url('right'), xR, 0, D, H);
+  add(url('back'),  xB, 0, W, H);
+  add(url('top'),   xB, -D, W, D);                            // lid above BACK
+  if(hasFlaps) add(url('outer-flap'), xB, -D-lip, W, lip);    // tuck flap above the lid
+  add(url('bottom'),xF, H, W, D);                             // bottom below FRONT
+
+  const pad = 20;
+  const minX = (hasFlaps ? xL-glueW : xL) - pad;
+  const minY = (-D - (hasFlaps?lip:0) - (hasFlaps?dustH:0)) - pad;
+  flatUnits = { items, minX, minY,
+    uW: (xB + W + pad) - minX,
+    uH: (H + D + (hasFlaps?dustH:0) + pad) - minY };
+  fitFlat();
+}
+
+// render the net at real pixel size (no transform scaling → SVGs stay crisp)
+function fitFlat(){
+  if(!flatUnits) return;
+  const r = flatEl.getBoundingClientRect();
+  if(!r.width) return;
+  const z = parseFloat(zoomInput.value) || 1;
+  const s = Math.min((r.width-60)/flatUnits.uW, (r.height-80)/flatUnits.uH) * z;
+  const { items, minX, minY, uW, uH } = flatUnits;
+  flatNet.style.width = (uW*s)+'px';
+  flatNet.style.height = (uH*s)+'px';
+  flatNet.style.transform = `translate(-50%,-50%) translate(${panX}px, ${panY}px)`;
+  flatNet.innerHTML = items.map(it=>{
+    const onerr = `onerror="this.style.display='none'"`;
+    const tf = it.tf ? `transform:${it.tf};` : '';
+    return `<img src="${it.href}" ${onerr} style="position:absolute;left:${(it.x-minX)*s}px;top:${(it.y-minY)*s}px;width:${it.w*s}px;height:${it.h*s}px;${tf}">`;
+  }).join('');
+}
+
+function refreshFlat(){ buildFlat(PRODUCTS[current]); }
+
+viewtoggle.addEventListener('click', ()=>{
+  const flat = document.body.classList.toggle('flatmode');
+  viewtoggle.textContent = flat ? '3D view' : 'Flat view';
+  panX=0; panY=0; applyPan();
+  if(flat) refreshFlat();
+});
+window.addEventListener('resize', ()=>{ if(document.body.classList.contains('flatmode')) fitFlat(); });
+
+/* ---- rotation + lighting ---- */
+let rx = -16, ry = -32;          // initial 3/4 hero angle
+let vx = 0, vy = 0;              // inertia
+let dragging = false, lastX=0, lastY=0, moved=false;
+
+// base outward normals in CSS coords (x→right, y→down, z→toward viewer)
+const NORMALS = {
+  front:[0,0,1], back:[0,0,-1],
+  right:[1,0,0], left:[-1,0,0],
+  top:[0,-1,0], bottom:[0,1,0]
+};
+// TEMP lighting params — tweak via the panel, then bake the values you like.
+// azimuth°, elevation°, intensity (slope of darkening), depth (max darkness)
+let LAZ = -52, LEL = -1, LINT = 0.28, LMAX = 0.34;
+function lightDir(){
+  const az = LAZ*Math.PI/180, el = LEL*Math.PI/180;
+  const v = [Math.sin(az)*Math.cos(el), -Math.sin(el), Math.cos(az)*Math.cos(el)];
+  const m = Math.hypot(...v) || 1; return v.map(x=>x/m);
+}
+
+function rotY(v,a){const c=Math.cos(a),s=Math.sin(a);return [c*v[0]+s*v[2], v[1], -s*v[0]+c*v[2]];}
+function rotX(v,a){const c=Math.cos(a),s=Math.sin(a);return [v[0], c*v[1]-s*v[2], s*v[1]+c*v[2]];}
+
+// grain "settles" after motion: lift it while things move, fade it back ~0.25s after they stop
+let _busyT=null;
+function bumpGrain(){
+  document.body.classList.add('busy');
+  clearTimeout(_busyT);
+  _busyT=setTimeout(()=>document.body.classList.remove('busy'), 240);
+}
+
+function render(){
+  bumpGrain();   // any visual change lifts the grain; it settles back when motion stops
+  box.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+  const ax = rx*Math.PI/180, ay = ry*Math.PI/180;
+  const L = lightDir();
+  const darkOf = n => {
+    const d = n[0]*L[0] + n[1]*L[1] + n[2]*L[2];
+    return Math.max(0, Math.min(LMAX, (0.5 - d) * LINT)).toFixed(3);
+  };
+  FACES.forEach((f,i)=>{
+    let n = rotX(rotY(NORMALS[f], ay), ax);   // box rotation (rotateY then rotateX)
+    shadeEls[i].style.opacity = darkOf(n);
+  });
+  // interior cavity — box rotation only (gives the recess + walls depth)
+  INT_SHADES.forEach(s=> s.el.style.opacity = darkOf(rotX(rotY(s.n, ay), ax)));
+  // lid — its normals first swing with the hinge, then the box rotation
+  const openA = (box.classList.contains('open') ? 125 : 0) * Math.PI/180;
+  LID_SHADES.forEach(s=>{
+    let n = rotX(s.n, openA);
+    s.el.style.opacity = darkOf(rotX(rotY(n, ay), ax));
+  });
+}
+
+/* drag = rotate only. panX/panY are used solely to frame the lid-focus view (not user pan). */
+let panX = 0, panY = 0, mode = 'rotate', focusMode = false;
+function applyPan(){
+  pedestal.style.transform = `translate(${panX}px, ${panY}px)`;
+  if(flatUnits) flatNet.style.transform = `translate(-50%,-50%) translate(${panX}px, ${panY}px)`;
+}
+function down(e){
+  if(document.body.classList.contains('flatmode')) return;   // flat view: zoom only, no drag
+  const pt = e.touches? e.touches[0]:e;
+  mode = 'rotate';
+  dragging=true; moved=false;
+  stage.classList.add('dragging');
+  lastX=pt.clientX; lastY=pt.clientY; vx=vy=0;
+  cancelInertia();
+}
+function move(e){
+  if(!dragging) return;
+  const pt = e.touches? e.touches[0]:e;
+  const dx = pt.clientX-lastX, dy = pt.clientY-lastY;
+  if(Math.abs(dx)+Math.abs(dy)>2) moved=true;
+  lastX=pt.clientX; lastY=pt.clientY;
+  ry += dx*0.45;                                    // horizontal always
+  if(!focusMode) rx = Math.max(-90, Math.min(90, rx - dy*0.45));   // vertical locked in focus
+  vx = dx*0.45; vy = focusMode ? 0 : -dy*0.45;
+  render();
+  if(e.cancelable) e.preventDefault();
+}
+let inertiaRAF=null;
+function cancelInertia(){ if(inertiaRAF) cancelAnimationFrame(inertiaRAF); inertiaRAF=null; }
+function up(){
+  if(!dragging) return;
+  dragging=false; stage.classList.remove('dragging'); flatEl.classList.remove('dragging');
+  if(mode!=='rotate') return;
+  function step(){
+    vx*=0.94; vy*=0.94;
+    if(Math.abs(vx)<0.05 && Math.abs(vy)<0.05){inertiaRAF=null;return;}
+    ry += vx; rx = Math.max(-90, Math.min(90, rx + vy));
+    render(); inertiaRAF=requestAnimationFrame(step);
+  }
+  cancelInertia(); inertiaRAF=requestAnimationFrame(step);
+}
+
+stage.addEventListener('mousedown',down);
+flatEl.addEventListener('mousedown',down);
+window.addEventListener('mousemove',move);
+window.addEventListener('mouseup',up);
+stage.addEventListener('touchstart',down,{passive:false});
+flatEl.addEventListener('touchstart',down,{passive:false});
+window.addEventListener('touchmove',move,{passive:false});
+window.addEventListener('touchend',up);
+
+
+
+/* bg toggle */
+document.getElementById('bgseg').addEventListener('click',e=>{
+  const btn = e.target.closest('button'); if(!btn) return;
+  document.body.dataset.bg = btn.dataset.bg;
+  document.querySelectorAll('#bgseg button').forEach(b=>
+    b.classList.toggle('active', b===btn));
+});
+
+/* zoom slider — scales the box uniformly so you can read fine print */
+const pedestal = document.querySelector('.pedestal');
+const zoomInput = document.getElementById('zoom');
+const zval = document.getElementById('zval');
+function applyZoom(){
+  bumpGrain();
+  const z = parseFloat(zoomInput.value);
+  zval.textContent = z.toFixed(1) + '×';
+  sizeBox();                       // grow the box (keeps SVG faces crisp — no raster scaling)
+  if(focusMode) focusPan(); else { panX=0; panY=0; applyPan(); }   // focus frames the opening; main is centred
+  if(document.body.classList.contains('flatmode')) fitFlat();
+}
+zoomInput.addEventListener('input', applyZoom);
+applyZoom();
+
+/* reset */
+document.getElementById('reset').addEventListener('click',()=>{
+  cancelInertia();
+  box.classList.remove('open'); openbtn.textContent = 'Open lid';   // animate back to 1.2× + closed lid
+  animateView(1.2, heroPersp, -16, -32, 0, ()=>{ focusMode = false; });
+});
+
+/* ---- lid focus mode: animate to a zoomed, near-parallel view of the opened lid ---- */
+let heroPersp = 3900;                                  // TEMP tweakable resting perspective
+let HERO_PERSP = heroPersp + 'px';
+const FOCUS_PERSP = '7000px';
+function focusPan(){
+  const bH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--h')) || 0;
+  panX = 0; panY = bH * 0.48; applyPan();
+}
+let animRAF = null;
+function animateView(toZoom, toPersp, toRx, toRy, toPanFrac, after){
+  if(animRAF) cancelAnimationFrame(animRAF);
+  const bH0 = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--h')) || 1;
+  const fromZoom  = parseFloat(zoomInput.value) || 1;
+  const fromPersp = parseFloat(stage.style.perspective) || 3900;
+  const fromRx = rx, fromRy = ry, fromFrac = panY / bH0;
+  const t0 = performance.now(), dur = 520;
+  (function step(now){
+    const k = Math.min(1, (now - t0)/dur), e = 1 - Math.pow(1-k, 3);   // ease-out
+    const z = fromZoom + (toZoom - fromZoom)*e;
+    zoomInput.value = z.toFixed(3); zval.textContent = z.toFixed(1) + '×';
+    stage.style.perspective = (fromPersp + (toPersp - fromPersp)*e) + 'px';
+    rx = fromRx + (toRx - fromRx)*e;
+    ry = fromRy + (toRy - fromRy)*e;
+    sizeBox();                          // re-renders the SVGs crisp at each interpolated size
+    const bH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--h')) || 0;
+    panX = 0; panY = (fromFrac + (toPanFrac - fromFrac)*e) * bH; applyPan();
+    render();
+    if(k < 1) animRAF = requestAnimationFrame(step);
+    else { animRAF = null; if(after) after(); }
+  })(t0);
+}
+function enterFocus(){ focusMode = true; animateView(2.2, 7000, -24, ry, 0.48); }
+function exitFocus(){ animateView(1.2, heroPersp, -16, -32, 0, ()=>{ focusMode = false; }); }
+
+window.addEventListener('resize', sizeBox);
+
+/* init */
+(function(){var q=new URLSearchParams(location.search);if(q.get('embed'))document.body.classList.add('embed');var pid=q.get('p'),idx=0;if(pid){var i=PRODUCTS.findIndex(function(x){return x.id===pid;});if(i>=0)idx=i;}selectProduct(idx);})();
+render();
+
+/* one-time intro ease + hint */
+(function intro(){
+  const hint=document.getElementById('hint');
+  const sy=ry; ry=-58; render();
+  const t0=performance.now(), dur=900;
+  (function anim(t){
+    const k=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-k,3);
+    ry=-58+(sy-(-58))*e; render();
+    if(k<1) requestAnimationFrame(anim);
+    else { hint.classList.add('show'); setTimeout(()=>hint.classList.remove('show'),2600); }
+  })(t0);
+})();
+</script>
+</body>
+</html>

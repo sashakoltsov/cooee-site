@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cooee — Copy Studio</title>
+<style>
+:root{
+  --bg:#f4f2ec; --panel:#fff; --ink:#1a1a1a; --sub:#6b6760; --line:#e2ded6;
+  --accent:#1a1a1a; --chip:#efece4; --warn:#a45b3a; --good:#3f6b4f; --mono-bg:#1c1b19; --mono-ink:#e9e6df;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;line-height:1.5}
+.wrap{max-width:1400px;margin:0 auto;padding:20px 22px 60px}
+
+/* Header */
+header{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+.brand{font-weight:800;font-size:22px;letter-spacing:-.01em}
+.brand span{font-weight:400;color:var(--sub);font-size:14px;letter-spacing:0;margin-left:8px}
+.tagline{font-size:12px;color:var(--sub);max-width:520px}
+
+/* Grid */
+.grid{display:grid;grid-template-columns:minmax(300px,360px) 1fr;gap:20px;align-items:start}
+@media(max-width:920px){.grid{grid-template-columns:1fr}}
+
+/* Layer cards */
+.layer{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin-bottom:12px}
+.layer h3{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--sub);margin-bottom:2px;display:flex;align-items:center;gap:8px}
+.layer .lnum{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:5px;background:var(--ink);color:#fff;font-size:10px;font-weight:700;letter-spacing:0}
+.layer .ltitle{font-size:14px;font-weight:600;margin:4px 0 8px}
+.layer .lnote{font-size:11.5px;color:var(--sub);line-height:1.5}
+
+/* Core toggles */
+.core-list{font-size:12px;color:var(--sub);line-height:1.7;margin-top:6px}
+.core-list b{color:var(--ink);font-weight:600}
+details.core summary{cursor:pointer;font-size:12px;color:var(--ink);font-weight:600;list-style:none;display:flex;align-items:center;gap:6px;user-select:none}
+details.core summary::-webkit-details-marker{display:none}
+details.core summary::before{content:"▸";color:var(--sub);transition:transform .15s}
+details.core[open] summary::before{transform:rotate(90deg)}
+.toggle-row{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px}
+.switch{position:relative;width:34px;height:19px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider-sw{position:absolute;inset:0;background:#cfcabf;border-radius:19px;transition:.15s;cursor:pointer}
+.slider-sw::before{content:"";position:absolute;width:15px;height:15px;left:2px;top:2px;background:#fff;border-radius:50%;transition:.15s}
+.switch input:checked + .slider-sw{background:var(--ink)}
+.switch input:checked + .slider-sw::before{transform:translateX(15px)}
+
+/* Segmented buttons */
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button{padding:6px 11px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);font-size:12px;cursor:pointer;transition:.12s;font-family:inherit}
+.seg button:hover{border-color:#bcb6aa}
+.seg button.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+/* Range */
+.range-wrap{margin-top:4px}
+input[type=range]{width:100%;accent-color:var(--ink);margin:8px 0 4px}
+.range-labels{display:flex;justify-content:space-between;font-size:10.5px;color:var(--sub)}
+.reg-readout{font-size:12.5px;font-weight:600;margin-top:6px}
+.reg-readout small{font-weight:400;color:var(--sub)}
+.reg-default{font-size:11px;color:var(--sub);margin-top:3px}
+
+/* Subject detail */
+.subj-detail{margin-top:10px;font-size:11.5px;color:var(--sub);line-height:1.6;border-top:1px dashed var(--line);padding-top:9px;display:none}
+.subj-detail.show{display:block}
+.subj-detail b{color:var(--ink);font-weight:600}
+.chiprow{display:flex;flex-wrap:wrap;gap:4px;margin:5px 0}
+.chip{font-size:10.5px;background:var(--chip);border-radius:5px;padding:2px 7px;color:#4a463f}
+.watch{background:#fbf1ea;border:1px solid #eeddd0;border-radius:6px;padding:7px 9px;margin-top:7px;font-size:11px;color:#7a4a2f;line-height:1.5}
+
+/* Task */
+textarea,input[type=text],input[type=password],select{width:100%;font-family:inherit;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:9px 10px;background:#fff;color:var(--ink);resize:vertical}
+textarea:focus,input:focus,select:focus{outline:none;border-color:#a9a396}
+.preset-row{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.preset-row button{font-size:11px;padding:4px 9px;border-radius:14px;border:1px solid var(--line);background:#fff;cursor:pointer;color:var(--sub);font-family:inherit}
+.preset-row button:hover{color:var(--ink);border-color:#bcb6aa}
+
+/* Right column */
+.rpanel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 17px;margin-bottom:14px}
+.rpanel h2{font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);margin-bottom:10px;display:flex;align-items:center;justify-content:space-between}
+.btn{font-family:inherit;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;transition:.12s}
+.btn:hover{opacity:.85}
+.btn.ghost{background:#fff;color:var(--ink)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Principles viz */
+.princ-group{margin-bottom:12px}
+.princ-group h4{font-size:11px;font-weight:700;letter-spacing:.03em;margin-bottom:5px;display:flex;align-items:center;gap:7px}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.d-core{background:#1a1a1a}.d-chan{background:#5b7fb0}.d-reg{background:#b08a4a}.d-subj{background:#5f8f6d}
+.princ-group ul{list-style:none;font-size:11.5px;color:#4a463f;line-height:1.55}
+.princ-group li{padding:3px 0 3px 16px;position:relative}
+.princ-group li::before{content:"—";position:absolute;left:0;color:var(--sub)}
+.princ-group li.hard{color:var(--warn)}
+
+/* Composed prompt */
+pre.prompt{background:var(--mono-bg);color:var(--mono-ink);border-radius:8px;padding:13px 14px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:340px;overflow:auto}
+
+/* Output */
+.gen-controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.gen-controls select{width:auto}
+.keyfield{display:flex;gap:6px;align-items:center;flex:1;min-width:220px}
+.keyfield input{flex:1}
+.out{background:#fbfaf7;border:1px solid var(--line);border-radius:8px;padding:14px 15px;min-height:80px;font-size:14px;line-height:1.6;white-space:pre-wrap}
+.out.placeholder{color:var(--sub);font-style:italic}
+.status{font-size:11.5px;color:var(--sub);margin-top:8px;min-height:16px}
+.status.err{color:var(--warn)}
+.hint{font-size:11px;color:var(--sub);margin-top:6px;line-height:1.5}
+.copy-ok{color:var(--good)!important}
+footer{margin-top:24px;font-size:11px;color:var(--sub);border-top:1px solid var(--line);padding-top:12px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <div class="brand">COOEE <span>Copy Studio</span></div>
+    <div class="tagline">Composable brand-voice drafting. Stack the layers, set the register, generate on-voice copy. v1 — voice sourced from the brand brief, intelligence framework and DNA.</div>
+  </div>
+  <button class="btn ghost" id="resetBtn">Reset</button>
+</header>
+
+<div class="grid">
+  <!-- LEFT: LAYERS -->
+  <div class="col-left">
+
+    <div class="layer">
+      <h3><span class="lnum">0</span> Always on</h3>
+      <div class="ltitle">Brand core</div>
+      <div class="lnote">Cooee's DNA, shared rules and hard constraints. Injected into every prompt.</div>
+      <details class="core">
+        <summary style="margin-top:10px">View what's in the core</summary>
+        <div class="core-list" id="coreView"></div>
+      </details>
+      <div class="toggle-row">
+        <label class="switch"><input type="checkbox" id="lexToggle" checked><span class="slider-sw"></span></label>
+        <span>Include in/out lexicon</span>
+      </div>
+    </div>
+
+    <div class="layer">
+      <h3><span class="lnum">1</span> Where it lives</h3>
+      <div class="ltitle">Channel</div>
+      <div class="seg" id="channelSeg"></div>
+      <div class="lnote" id="channelNote" style="margin-top:9px"></div>
+    </div>
+
+    <div class="layer">
+      <h3><span class="lnum">2</span> How Australian</h3>
+      <div class="ltitle">Register dial</div>
+      <div class="range-wrap">
+        <input type="range" id="regRange" min="0" max="100" value="35" step="5">
+        <div class="range-labels"><span>Restrained</span><span>Relaxed</span><span>Vernacular</span></div>
+        <div class="reg-readout" id="regReadout"></div>
+        <div class="reg-default" id="regDefault"></div>
+      </div>
+    </div>
+
+    <div class="layer">
+      <h3><span class="lnum">3</span> What it's about</h3>
+      <div class="ltitle">Subject</div>
+      <div class="seg" id="subjSeg"></div>
+      <div class="subj-detail" id="subjDetail"></div>
+    </div>
+
+    <div class="layer">
+      <h3><span class="lnum">4</span> The specific ask</h3>
+      <div class="ltitle">Task</div>
+      <div class="preset-row" id="presetRow"></div>
+      <textarea id="taskInput" rows="3" placeholder="e.g. Write the hero line plus a 40-word intro paragraph."></textarea>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: OUTPUT -->
+  <div class="col-right">
+
+    <div class="rpanel">
+      <h2>Principles in play</h2>
+      <div id="principles"></div>
+    </div>
+
+    <div class="rpanel">
+      <h2>Composed prompt <button class="btn ghost" id="copyPromptBtn" style="font-size:11px;padding:4px 10px">Copy prompt</button></h2>
+      <pre class="prompt" id="promptOut"></pre>
+    </div>
+
+    <div class="rpanel">
+      <h2>Draft</h2>
+      <div class="gen-controls">
+        <select id="modelSel">
+          <option value="claude-sonnet-5">Claude Sonnet 5</option>
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5</option>
+          <option value="claude-opus-4-8">Claude Opus 4.8</option>
+        </select>
+        <div class="keyfield">
+          <input type="password" id="apiKey" placeholder="Anthropic API key (session only)">
+        </div>
+        <button class="btn" id="genBtn">Generate</button>
+      </div>
+      <div class="out placeholder" id="draftOut">Set the layers, add an API key and hit Generate — or copy the composed prompt into any model.</div>
+      <div class="status" id="status"></div>
+      <div class="hint">The key is held in memory for this session only — never stored or sent anywhere but Anthropic. No key? Use “Copy prompt” and paste into Claude.</div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  Cooee Copy Studio v1 · Layers compose into a single prompt: brand core + channel + register + subject + task. Register defaults per channel; override any time. Source of voice: brand brief (Apr 2026), consumer intelligence framework, brand DNA.
+</footer>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   VOICE DATA
+   ============================================================ */
+
+const CORE = {
+  identity:
+    "Cooee is an Australian fragrance house. Three fragrances, one olfactive spine. Everything is formulated and hand-blended in small batches. The formulas do not change and are never discontinued.",
+  tension: "Refined + informal. Precision without preciousness: refined structure, human content.",
+  pillars: [
+    ["Credible (sophisticated)", "Harmonious blending; refinement drawn from genuinely good materials. Sound like you know the subject — because you do. Never announce sophistication; demonstrate it."],
+    ["Down-to-earth (generous)", "Direct, forthright compositions that smell of what they say they do. Honesty as not skimping on materials, and honesty about strength and longevity. Respect the reader's intelligence."],
+    ["Uninhibited (free-spirited)", "A touch of uncensored expression. An arresting nod to nature, moments and emotions as they actually are — not idealised the way modern perfumery tends to."]
+  ],
+  rules: [
+    ["Concept-to-smell fidelity", "Every description must be verifiable on skin. If a blind wearer wouldn't recognise the place or moment, the copy has overreached."],
+    ["Materials over adjectives", "Name real materials. One precise material name beats three vague adjectives."],
+    ["Honest performance", "State performance plainly. Signal the drydown so no one is disappointed. Never oversell longevity."],
+    ["Show decisions, don't explain them", "Reveal the choice (formulate in-house, never reformulate) and let the reader draw the conclusion."]
+  ],
+  constraints: [
+    "Never open with “A fragrance that…” (or “A scent that…”, “An eau de… that…”).",
+    "Geosmin is “mineral” on pack. Its full name and the petrichor story are allowed only in extended, digital or sales-assistant copy — never on pack.",
+    "No hashtags. No emoji. (Hard rule on social; avoid everywhere.)",
+    "No exclamation marks.",
+    "Don't idealise. Avoid generic-luxury and generic-perfume cliché."
+  ],
+  lexIn: [
+    "concrete material names (Blue Cypress, Cashmeran, Cypriol)",
+    "real places and times of day",
+    "temperature and texture words",
+    "plain, physical verbs",
+    "short declaratives",
+    "one honest caveat where it earns trust",
+    "specificity over adjective stacks"
+  ],
+  lexOut: [
+    "indulge", "pamper", "luxurious", "journey", "elevate", "unleash",
+    "captivating", "alluring", "sensorial", "olfactory experience",
+    "evoke (as filler)", "notes of… (as padding)", "perfect", "escape (as cliché)"
+  ]
+};
+
+const CHANNELS = {
+  packaging: { label:"Outer packaging", regDefault:10,
+    note:"Most restrained. Still and certain. One or two precise images, one or two real material names. Very short.",
+    rules:[
+      "Most restrained register. Still and certain.",
+      "One or two precise images; one or two real material names.",
+      "Very short. No sentence starts with “A fragrance that…”.",
+      "Geosmin appears only as “mineral” here."
+    ]},
+  insert: { label:"Insert / inner card", regDefault:30,
+    note:"Slightly expansive. Fragments welcome. The concept, the materials, honest context. Where Geosmin earns its sentence.",
+    rules:[
+      "Slightly expansive; fragments welcome.",
+      "Room for the concept, the materials and honest context.",
+      "This is where Geosmin can earn its full name and story.",
+      "Use the reader's attention sparingly."
+    ]},
+  product: { label:"Product page", regDefault:35,
+    note:"Sommelier register. Warmth through specificity. Concept first, materials woven through, performance stated plainly. Write for the curious, not the unconvinced.",
+    rules:[
+      "Sommelier register — warmth through specificity.",
+      "Lead with the concept: the specific moment.",
+      "Weave materials through; state performance plainly.",
+      "Write for the curious, not the unconvinced."
+    ]},
+  about: { label:"About / brand story", regDefault:45,
+    note:"Most personal. Reveals decisions, not biography. Name origin, the in-house formulation decision, the no-reformulation commitment. Show, don't explain.",
+    rules:[
+      "Most personal register; reveals decisions, not biography.",
+      "Origin of the name; the decision to formulate in-house.",
+      "The no-reformulation commitment — shown, not justified.",
+      "Show why it's good; don't tell the reader it is."
+    ]},
+  email: { label:"Email / DTC", regDefault:55,
+    note:"Direct to the point of informality. Subject line is the content, not the promise of it. First sentence says what the email is about. No warmup.",
+    rules:[
+      "Direct, to the point of informality.",
+      "Subject line = the content itself, not the promise of it.",
+      "First sentence states what the email is actually about.",
+      "No warmup, no throat-clearing."
+    ]},
+  social: { label:"Social / editorial", regDefault:70,
+    note:"Very short. The image carries the weight; copy adds one fact it can't. No hashtags. No emoji.",
+    rules:[
+      "Very short. The image works; copy adds one fact.",
+      "One precise thing the image can't carry.",
+      "No hashtags. No emoji.",
+      "Highest room for Australian voice — still refined."
+    ]}
+};
+
+function regBand(v){
+  if(v <= 25) return {name:"Restrained", desc:"Plain, precise, no idiom. Standard English; Australian in attitude, not vocabulary."};
+  if(v <= 55) return {name:"Relaxed", desc:"Warm and plain, with the occasional Australian rhythm. Idiom used lightly, never forced."};
+  if(v <= 80) return {name:"Loosened", desc:"Audibly Australian. Colloquial turns and a bit of cheek where it fits, still credible."};
+  return {name:"Vernacular", desc:"Confidently, unmistakably Australian. Colloquial and direct. Watch the premium line."};
+}
+
+const SUBJECTS = {
+  none: { label:"Free brief", detail:null },
+  cologne: { label:"Cooee Cologne",
+    concept:"“Saturdays at the surf club.” A green-resinous coastal morning; dry warmth carried on mineral air that's hard to name but instantly recognisable once you've been there.",
+    notes:["Blue Cypress (Darwin)","Bergamot","Australian Sandalwood","Mineral air (Geosmin)"],
+    persona:"The Naturalistic Escapist — concept-first, place-and-memory. Scent as fictional travel; a destination, not a grooming product.",
+    perf:"Drydown signal: Mineral air · Skin musk.",
+    watch:"Must smell like a place, not a product. Real light, real landscape — no lab or perfume-counter aesthetics. “Mineral” on pack; Geosmin story off-pack." },
+  sunskin: { label:"Sun Skin",
+    concept:"“Nourished by sun.” Not sunscreen — the specific moment late-afternoon warmth sinks into bare skin and you stop, eyes closed, entirely present.",
+    notes:["Turmeric Leaf","Magnolia","Cashmeran","Solar salicylate bed","Skin warmth"],
+    persona:"The Sensual Naturalist — effortless sensual presence and genuine naturalness at once. Loyalty driver: longevity of the warm Cashmeran character.",
+    perf:"Warm Cashmeran character must hold; that's the loyalty driver.",
+    watch:"The feeling, not the smell of sunscreen. Never resolve the Cashmeran–salicylate tension: warm AND fresh together. Explain Turmeric Leaf — the leaf (green, citrus, tropical), not the kitchen spice." },
+  aperitivo: { label:"Aperitivo",
+    concept:"“The night before it begins.” Anticipation and transformation — the darkly anticipatory moment before a night unfolds, not the drink itself.",
+    notes:["Blue Cypress","Blackcurrant","Violet / Iris","Cypriol","Macrocyclic Musk"],
+    persona:"The Dark Feminine Archetype (primary) — not “I smell nice” but “I become someone else.” Secondary: the Textural Adventurer, the word-of-mouth engine.",
+    perf:"Macrocyclic musk base (Ambrettolide + Helvetolide) holds through a full evening — a product truth, not a boast.",
+    watch:"Name–formula tension unresolved: the word conjures golden hour, the formula is nocturnal — AD must carry the dark reading (or rename). No rose, no saffron, no conventional oud is the positioning; keep it in the copy." }
+};
+
+const PRESETS = {
+  packaging:[["Front pack line","Write the front-of-pack concept line only — three to six words."],["Back pack copy","Write the short back-of-pack paragraph: concept line, then two sentences, then the three hero materials."]],
+  insert:[["Insert card","Write the inner insert card: the concept, the materials, one honest line of context."],["Geosmin sentence","Write the single sentence where Geosmin earns its full name and the petrichor story."]],
+  product:[["Hero + intro","Write the hero line plus a 40-word intro paragraph."],["Full PDP copy","Write product-page copy: concept, materials woven through, a plain performance line."],["Notes block","Write the notes/materials block with a short phrase on each."]],
+  about:[["Name origin","Write the short section on where the name Cooee comes from."],["No-reformulation","Write the passage on formulating in-house and never reformulating — shown, not justified."]],
+  email:[["Launch email","Write a launch email: subject line plus three short paragraphs."],["Subject lines","Write five subject lines — the content, not the promise of it."]],
+  social:[["IG caption","Write one Instagram caption — one fact the image can't carry."],["Launch post","Write a short launch post: one line, one material fact."]]
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = { lex:true, channel:"product", reg:35, regTouched:false, subject:"none", task:"" };
+
+/* ============================================================
+   RENDER STATIC
+   ============================================================ */
+// core view
+(function(){
+  let h = `<p style="margin:8px 0"><b>Identity.</b> ${CORE.identity}</p>`;
+  h += `<p style="margin:8px 0"><b>Tension.</b> ${CORE.tension}</p>`;
+  h += `<p style="margin:8px 0 3px"><b>Pillars.</b></p>`;
+  CORE.pillars.forEach(p=> h += `<p style="margin:3px 0"><b>${p[0]}</b> — ${p[1]}</p>`);
+  h += `<p style="margin:8px 0 3px"><b>Rules.</b></p>`;
+  CORE.rules.forEach(r=> h += `<p style="margin:3px 0"><b>${r[0]}</b> — ${r[1]}</p>`);
+  h += `<p style="margin:8px 0 3px"><b>Hard constraints.</b></p>`;
+  CORE.constraints.forEach(c=> h += `<p style="margin:3px 0">• ${c}</p>`);
+  document.getElementById("coreView").innerHTML = h;
+})();
+
+// channel segmented
+const channelSeg = document.getElementById("channelSeg");
+Object.keys(CHANNELS).forEach(k=>{
+  const b=document.createElement("button");
+  b.textContent=CHANNELS[k].label; b.dataset.k=k;
+  if(k===state.channel) b.classList.add("active");
+  b.onclick=()=>{ state.channel=k; state.regTouched=false; state.reg=CHANNELS[k].regDefault;
+    document.querySelectorAll("#channelSeg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); document.getElementById("regRange").value=state.reg;
+    syncPresets(); render(); };
+  channelSeg.appendChild(b);
+});
+
+// subject segmented
+const subjSeg = document.getElementById("subjSeg");
+Object.keys(SUBJECTS).forEach(k=>{
+  const b=document.createElement("button");
+  b.textContent=SUBJECTS[k].label; b.dataset.k=k;
+  if(k===state.subject) b.classList.add("active");
+  b.onclick=()=>{ state.subject=k;
+    document.querySelectorAll("#subjSeg button").forEach(x=>x.classList.remove("active"));
+    b.classList.add("active"); render(); };
+  subjSeg.appendChild(b);
+});
+
+/* ============================================================
+   PRESETS
+   ============================================================ */
+function syncPresets(){
+  const row=document.getElementById("presetRow"); row.innerHTML="";
+  (PRESETS[state.channel]||[]).forEach(([label,text])=>{
+    const b=document.createElement("button"); b.textContent=label;
+    b.onclick=()=>{ document.getElementById("taskInput").value=text; state.task=text; render(); };
+    row.appendChild(b);
+  });
+}
+
+/* ============================================================
+   PROMPT COMPOSITION
+   ============================================================ */
+function composePrompt(){
+  const ch=CHANNELS[state.channel], band=regBand(state.reg), subj=SUBJECTS[state.subject];
+  let p="";
+  p+="[BRAND CORE]\n";
+  p+=CORE.identity+"\n";
+  p+="Voice tension: "+CORE.tension+"\n";
+  p+="Personality:\n";
+  CORE.pillars.forEach(x=>p+="  • "+x[0]+": "+x[1]+"\n");
+  p+="Rules:\n";
+  CORE.rules.forEach(x=>p+="  • "+x[0]+": "+x[1]+"\n");
+  p+="Hard constraints:\n";
+  CORE.constraints.forEach(x=>p+="  • "+x+"\n");
+  if(state.lex){
+    p+="Lean into: "+CORE.lexIn.join("; ")+".\n";
+    p+="Avoid these words/moves: "+CORE.lexOut.join(", ")+".\n";
+  }
+  p+="\n[CHANNEL — "+ch.label+"]\n";
+  ch.rules.forEach(x=>p+="  • "+x+"\n");
+  p+="\n[REGISTER — "+band.name+" ("+state.reg+"/100)]\n  "+band.desc+"\n";
+
+  p+="\n[SUBJECT]\n";
+  if(state.subject==="none"){
+    p+="  Free brief — take the subject from the task below. Hold to the brand core.\n";
+  } else {
+    p+="  "+subj.label+"\n";
+    p+="  Concept: "+subj.concept+"\n";
+    p+="  Key materials: "+subj.notes.join(" · ")+"\n";
+    p+="  Target persona: "+subj.persona+"\n";
+    p+="  Performance: "+subj.perf+"\n";
+    p+="  Watch-outs: "+subj.watch+"\n";
+  }
+  p+="\n[TASK]\n  "+(state.task.trim()||"(describe the specific piece of copy you want)")+"\n";
+  p+="\nWrite the copy now. Return only the copy — no preamble, no notes, no options unless asked.";
+  return p;
+}
+
+/* ============================================================
+   PRINCIPLES VIZ
+   ============================================================ */
+function renderPrinciples(){
+  const ch=CHANNELS[state.channel], band=regBand(state.reg), subj=SUBJECTS[state.subject];
+  let h="";
+  h+=`<div class="princ-group"><h4><span class="dot d-core"></span>Brand core</h4><ul>`;
+  h+=`<li>${CORE.tension}</li>`;
+  CORE.constraints.forEach(c=>h+=`<li class="hard">${c}</li>`);
+  if(state.lex) h+=`<li>Lexicon active — steering word choice in and out.</li>`;
+  h+=`</ul></div>`;
+
+  h+=`<div class="princ-group"><h4><span class="dot d-chan"></span>Channel · ${ch.label}</h4><ul>`;
+  ch.rules.forEach(r=>h+=`<li>${r}</li>`); h+=`</ul></div>`;
+
+  h+=`<div class="princ-group"><h4><span class="dot d-reg"></span>Register · ${band.name} (${state.reg})</h4><ul><li>${band.desc}</li></ul></div>`;
+
+  if(state.subject!=="none"){
+    h+=`<div class="princ-group"><h4><span class="dot d-subj"></span>Subject · ${subj.label}</h4><ul>`;
+    h+=`<li>${subj.concept}</li>`;
+    h+=`<li>Materials: ${subj.notes.join(" · ")}</li>`;
+    h+=`<li>Persona: ${subj.persona}</li>`;
+    h+=`</ul></div>`;
+  }
+  document.getElementById("principles").innerHTML=h;
+}
+
+/* ============================================================
+   SUBJECT DETAIL
+   ============================================================ */
+function renderSubjectDetail(){
+  const el=document.getElementById("subjDetail"), subj=SUBJECTS[state.subject];
+  if(state.subject==="none"){ el.classList.remove("show"); el.innerHTML=""; return; }
+  let h=`<b>${subj.label}</b><br>${subj.concept}`;
+  h+=`<div class="chiprow">`+subj.notes.map(n=>`<span class="chip">${n}</span>`).join("")+`</div>`;
+  h+=`<b>Persona:</b> ${subj.persona}`;
+  h+=`<div class="watch"><b>Watch-outs.</b> ${subj.watch}</div>`;
+  el.innerHTML=h; el.classList.add("show");
+}
+
+/* ============================================================
+   RENDER ALL
+   ============================================================ */
+function render(){
+  const ch=CHANNELS[state.channel], band=regBand(state.reg);
+  document.getElementById("channelNote").textContent=ch.note;
+  document.getElementById("regReadout").innerHTML=band.name+" <small>— "+band.desc+"</small>";
+  document.getElementById("regDefault").textContent =
+    state.regTouched ? "Overridden. Channel default is "+ch.regDefault+"." : "Using the "+ch.label+" default ("+ch.regDefault+").";
+  renderSubjectDetail();
+  renderPrinciples();
+  document.getElementById("promptOut").textContent=composePrompt();
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
+document.getElementById("lexToggle").onchange=e=>{ state.lex=e.target.checked; render(); };
+document.getElementById("regRange").oninput=e=>{ state.reg=+e.target.value; state.regTouched=true; render(); };
+document.getElementById("taskInput").oninput=e=>{ state.task=e.target.value; document.getElementById("promptOut").textContent=composePrompt(); };
+
+document.getElementById("copyPromptBtn").onclick=function(){
+  navigator.clipboard.writeText(composePrompt()).then(()=>{
+    const b=this; const t=b.textContent; b.textContent="Copied"; b.classList.add("copy-ok");
+    setTimeout(()=>{b.textContent=t;b.classList.remove("copy-ok");},1200);
+  });
+};
+
+document.getElementById("resetBtn").onclick=()=>{
+  state.lex=true; state.channel="product"; state.reg=CHANNELS.product.regDefault; state.regTouched=false;
+  state.subject="none"; state.task="";
+  document.getElementById("lexToggle").checked=true;
+  document.getElementById("regRange").value=state.reg;
+  document.getElementById("taskInput").value="";
+  document.querySelectorAll("#channelSeg button").forEach(x=>x.classList.toggle("active",x.dataset.k==="product"));
+  document.querySelectorAll("#subjSeg button").forEach(x=>x.classList.toggle("active",x.dataset.k==="none"));
+  syncPresets(); render();
+};
+
+/* ============================================================
+   GENERATE (Anthropic API, browser-direct)
+   ============================================================ */
+async function generate(){
+  const key=document.getElementById("apiKey").value.trim();
+  const status=document.getElementById("status");
+  const out=document.getElementById("draftOut");
+  const btn=document.getElementById("genBtn");
+  status.classList.remove("err");
+  if(!state.task.trim()){ status.textContent="Add a task first (or pick a preset)."; status.classList.add("err"); return; }
+  if(!key){ status.textContent="No API key — use “Copy prompt” and paste into Claude instead."; status.classList.add("err"); return; }
+  const model=document.getElementById("modelSel").value;
+  const full=composePrompt();
+  const sysEnd=full.indexOf("\n[TASK]");
+  const system=full.slice(0,sysEnd);
+  const userMsg=full.slice(sysEnd);
+  btn.disabled=true; status.textContent="Generating…"; out.classList.add("placeholder"); out.textContent="…";
+  try{
+    const res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-api-key":key,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({ model, max_tokens:1024, system, messages:[{role:"user",content:userMsg}] })
+    });
+    if(!res.ok){ const t=await res.text(); throw new Error("HTTP "+res.status+" — "+t.slice(0,300)); }
+    const data=await res.json();
+    const text=(data.content||[]).filter(c=>c.type==="text").map(c=>c.text).join("\n").trim();
+    out.classList.remove("placeholder");
+    out.textContent=text||"(empty response)";
+    status.textContent="Model: "+model+(data.usage?(" · "+data.usage.output_tokens+" output tokens"):"");
+  }catch(err){
+    out.classList.add("placeholder"); out.textContent="Generation failed.";
+    status.textContent=String(err.message||err); status.classList.add("err");
+  }finally{ btn.disabled=false; }
+}
+document.getElementById("genBtn").onclick=generate;
+
+/* init */
+syncPresets();
+render();
+</script>
+</body>
+</html>
